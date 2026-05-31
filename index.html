@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#FFF8F0">
-  <title>🥟 饺子铺</title>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
+  <title>🥟 妈妈的饺子</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,6 +15,7 @@
       --primary: #E67E22;
       --primary-dark: #D35400;
       --success: #27AE60;
+      --deliver: #2980B9;
       --danger: #E74C3C;
       --text: #2C3E50;
       --text-light: #7F8C8D;
@@ -38,19 +35,16 @@
 
     .app { max-width: 480px; margin: 0 auto; padding: 16px 16px 120px; }
 
-    /* ── Header ── */
     .header { text-align: center; padding: 24px 0 8px; }
     .header h1 { font-size: 28px; font-weight: 700; }
     .header .sub { font-size: 14px; color: var(--text-light); margin-top: 4px; }
 
-    /* ── Tabs (admin) ── */
-    .tabs { display: flex; gap: 8px; margin: 16px 0; background: var(--card); border-radius: var(--radius); padding: 4px; box-shadow: var(--shadow); }
-    .tab { flex: 1; padding: 12px 8px; border: none; background: transparent; border-radius: 8px; font-size: 17px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; position: relative; }
+    .tabs { display: flex; gap: 6px; margin: 16px 0; background: var(--card); border-radius: var(--radius); padding: 4px; box-shadow: var(--shadow); }
+    .tab { flex: 1; padding: 11px 6px; border: none; background: transparent; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 3px; position: relative; }
     .tab.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(230,126,34,0.3); }
     .badge { background: var(--danger); color: #fff; font-size: 12px; min-width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 0 6px; font-weight: 700; position: absolute; top: -6px; right: -6px; }
     .tab.active .badge { background: #fff; color: var(--primary); }
 
-    /* ── Form ── */
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
     .input { width: 100%; padding: 14px 16px; font-size: 18px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); transition: border-color 0.2s; -webkit-appearance: none; }
@@ -61,18 +55,6 @@
     .pill { padding: 10px 16px; font-size: 16px; border: 2px solid var(--border); border-radius: 50px; background: var(--card); color: var(--text); cursor: pointer; transition: all 0.15s; font-weight: 500; }
     .pill:active { transform: scale(0.96); }
     .pill.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .custom-input { margin-top: 10px; width: 100%; padding: 12px 16px; font-size: 16px; border: 2px solid var(--border); border-radius: var(--radius); display: none; -webkit-appearance: none; }
-    .custom-input.show { display: block; }
-    .custom-input:focus { outline: none; border-color: var(--primary); }
-
-    .weight-row { display: flex; align-items: center; gap: 10px; }
-    .weight-btn { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border); background: var(--card); font-size: 24px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); flex-shrink: 0; }
-    .weight-btn:active { background: #f0f0f0; }
-    .weight-display { font-size: 34px; font-weight: 700; min-width: 80px; text-align: center; color: var(--primary-dark); }
-    .weight-unit { font-size: 16px; font-weight: 500; color: var(--text-light); }
-    .weight-quicks { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .weight-quick { padding: 8px 16px; font-size: 15px; border: 2px solid var(--border); border-radius: 50px; background: var(--card); cursor: pointer; font-weight: 500; }
-    .weight-quick:active { background: #f0f0f0; }
 
     .toggle-row { display: flex; gap: 10px; }
     .toggle-btn { flex: 1; padding: 16px; font-size: 18px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--card); cursor: pointer; font-weight: 600; text-align: center; transition: all 0.15s; }
@@ -82,20 +64,42 @@
     .btn-submit:active { transform: scale(0.98); opacity: 0.9; }
     .btn-submit:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
-    /* ── Success screen ── */
     .success-screen { text-align: center; padding: 60px 20px; }
     .success-screen .emoji { font-size: 80px; margin-bottom: 20px; }
     .success-screen h2 { font-size: 24px; margin-bottom: 8px; color: var(--success); }
     .success-screen p { font-size: 16px; color: var(--text-light); margin-bottom: 32px; line-height: 1.6; }
     .btn-new-order { padding: 14px 32px; font-size: 18px; font-weight: 700; background: var(--primary); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
 
-    /* ── Stats (admin) ── */
+    .date-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+    .date-nav-arrow { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: var(--card); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
+    .date-nav-arrow:active { background: #f0f0f0; }
+    .date-nav-label { font-size: 17px; font-weight: 700; min-width: 130px; text-align: center; }
+    .date-nav-today { font-size: 13px; color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+    /* ── Summary ── */
+    .summary-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 16px; }
+    .summary-toggle { width: 100%; background: none; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); padding: 0; }
+    .summary-toggle .arrow { transition: transform 0.2s; font-size: 14px; }
+    .summary-toggle.open .arrow { transform: rotate(180deg); }
+    .summary-body { margin-top: 12px; display: none; }
+    .summary-body.open { display: block; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f0eb; font-size: 15px; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .label { color: var(--text-light); }
+    .summary-row .value { font-weight: 700; color: var(--text); }
+    .summary-row .value.highlight { color: var(--primary-dark); font-size: 18px; }
+    .summary-row .value.dumplings { color: #E67E22; }
+    .summary-divider { border-top: 2px dashed var(--border); margin: 8px 0; padding-top: 8px; }
+    .summary-filling-row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; color: var(--text-light); }
+    .summary-filling-row .count { font-weight: 600; color: var(--text); }
+
     .stats-bar { display: flex; gap: 8px; margin-bottom: 16px; }
     .stat-card { flex: 1; background: var(--card); border-radius: var(--radius); padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
     .stat-value { font-size: 28px; font-weight: 700; color: var(--primary-dark); }
     .stat-label { font-size: 13px; color: var(--text-light); margin-top: 2px; }
     .stat-card.pending .stat-value { color: #E67E22; }
     .stat-card.done .stat-value { color: #27AE60; }
+    .stat-card.delivered .stat-value { color: #2980B9; }
     .stat-card.total .stat-value { color: var(--text); }
 
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 4px; }
@@ -107,14 +111,16 @@
     .order-list { display: flex; flex-direction: column; gap: 10px; }
     .order-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border-left: 4px solid transparent; cursor: pointer; transition: all 0.2s; }
     .order-card.pending { border-left-color: #E67E22; }
-    .order-card.done { border-left-color: #27AE60; opacity: 0.7; }
-    .order-card.done .order-filling, .order-card.done .order-name { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #ccc; }
+    .order-card.done { border-left-color: #27AE60; }
+    .order-card.delivered { border-left-color: #2980B9; }
+    .order-card.delivered.paid-done { opacity: 0.65; }
+    .order-card.delivered.paid-done .order-filling,
+    .order-card.delivered.paid-done .order-name { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #ccc; }
     .order-card:active { transform: scale(0.99); }
-    .order-card.new-order { animation: slideIn 0.4s ease-out; border-left-color: #E74C3C; background: #FFF5F0; }
 
     .order-row1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
     .order-name { font-size: 18px; font-weight: 700; }
-    .order-time { font-size: 12px; color: var(--text-light); white-space: nowrap; margin-left: 8px; }
+    .order-date { font-size: 12px; color: var(--text-light); white-space: nowrap; margin-left: 8px; }
     .order-row2 { font-size: 16px; margin-bottom: 4px; }
     .order-filling { font-weight: 600; }
     .order-weight { color: var(--primary-dark); font-weight: 700; }
@@ -122,34 +128,47 @@
     .order-type.cooked { background: #FFF3E0; color: #E67E22; }
     .order-type.raw { background: #E3F2FD; color: #1976D2; }
     .order-notes { font-size: 13px; color: var(--text-light); margin-top: 4px; font-style: italic; }
-    .order-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
-    .btn-done { padding: 10px 20px; font-size: 15px; font-weight: 700; background: var(--success); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
+    .order-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; flex-wrap: wrap; }
+    .btn-done { padding: 10px 18px; font-size: 15px; font-weight: 700; background: var(--success); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
     .btn-done:active { opacity: 0.8; }
+    .btn-deliver { padding: 10px 18px; font-size: 15px; font-weight: 700; background: var(--deliver); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
+    .btn-deliver:active { opacity: 0.8; }
     .btn-delete { padding: 10px 16px; font-size: 15px; font-weight: 600; background: #fff; color: var(--danger); border: 2px solid var(--danger); border-radius: 50px; cursor: pointer; }
     .btn-delete:active { background: #FFF5F5; }
-    .btn-undo { padding: 10px 20px; font-size: 15px; font-weight: 700; background: #fff; color: #E67E22; border: 2px solid #E67E22; border-radius: 50px; cursor: pointer; }
+    .btn-undo { padding: 10px 16px; font-size: 15px; font-weight: 600; background: #fff; color: #E67E22; border: 2px solid #E67E22; border-radius: 50px; cursor: pointer; }
     .btn-undo:active { background: #FFF8F0; }
+    .btn-pay { padding: 10px 14px; font-size: 15px; font-weight: 700; background: #F39C12; color: #fff; border: none; border-radius: 50px; cursor: pointer; }
+    .btn-pay:active { opacity: 0.8; }
+    .btn-pay.paid { background: #27AE60; }
+    .paid-badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
+    .paid-badge.yes { background: #D5F5E3; color: #27AE60; }
+    .paid-badge.no { background: #FADBD8; color: #E74C3C; }
+    .qty-badge { display: inline-block; background: #E74C3C; color: #fff; font-size: 13px; padding: 3px 10px; border-radius: 50px; font-weight: 700; margin-left: 6px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+
+    /* ── Summary filling detail ── */
+    .filling-detail { display: none; padding-left: 12px; margin-top: 2px; }
+    .filling-detail.open { display: block; }
+    .filling-detail-row { display: flex; justify-content: space-between; font-size: 13px; padding: 2px 0; color: var(--text-light); }
+    .filling-detail-row .customer { font-weight: 500; color: var(--text); }
+    .filling-detail-row .dots { color: #CCC; margin: 0 6px; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
     .empty-state .emoji { font-size: 64px; margin-bottom: 16px; }
     .empty-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
     .empty-state p { font-size: 15px; line-height: 1.5; }
 
-    /* ── Connection status ── */
     .conn-status { position: fixed; top: 12px; right: 12px; font-size: 12px; padding: 4px 10px; border-radius: 50px; font-weight: 600; z-index: 100; }
     .conn-status.online { background: #D5F5E3; color: #27AE60; }
     .conn-status.offline { background: #FADBD8; color: #E74C3C; }
 
-    /* ── Toast ── */
     .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: calc(100% - 32px); max-width: 450px; }
     .toast { background: #2C3E50; color: #fff; padding: 14px 20px; border-radius: 50px; font-size: 15px; font-weight: 600; pointer-events: auto; animation: toastIn 0.3s ease-out; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     .toast.leaving { animation: toastOut 0.3s ease-in forwards; }
 
     @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* ── Overlay ── */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; display: flex; align-items: center; justify-content: center; }
     .dialog { background: var(--card); border-radius: 16px; padding: 24px; margin: 24px; text-align: center; max-width: 320px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
     .dialog h3 { font-size: 18px; margin-bottom: 8px; }
@@ -159,19 +178,31 @@
     .btn-cancel { background: #f0f0f0; color: var(--text); }
     .btn-confirm { background: var(--danger); color: #fff; }
 
-    /* ── Link bar (bottom of customer page) ── */
-    .admin-link { text-align: center; margin-top: 40px; }
-    .admin-link a { color: var(--text-light); font-size: 13px; text-decoration: none; opacity: 0.5; }
+    /* ── PIN Lock ── */
+    .pin-screen { text-align: center; padding: 80px 20px 40px; }
+    .pin-screen .emoji { font-size: 64px; margin-bottom: 16px; }
+    .pin-screen h2 { font-size: 22px; margin-bottom: 8px; }
+    .pin-screen p { font-size: 14px; color: var(--text-light); margin-bottom: 24px; }
+    .pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; }
+    .pin-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); background: var(--card); transition: all 0.15s; box-shadow: var(--shadow); }
+    .pin-dot.filled { background: var(--primary); border-color: var(--primary); }
+    .pin-dot.wrong { background: var(--danger); border-color: var(--danger); animation: shake 0.4s; }
+    .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 0 auto; }
+    .pin-key { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); background: var(--card); font-size: 24px; font-weight: 600; cursor: pointer; color: var(--text); box-shadow: var(--shadow); }
+    .pin-key:active { background: #f0f0f0; transform: scale(0.95); }
+    .pin-key.delete { font-size: 16px; font-weight: 500; }
+    .pin-back { display: block; margin: 24px auto 0; background: none; border: none; color: var(--text-light); font-size: 14px; cursor: pointer; text-decoration: underline; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
   </style>
 </head>
 <body>
 
-  <!-- ━━ CUSTOMER 顾客下单页面 ━━ -->
+  <!-- ━━ 顾客下单页面 ━━ -->
   <div id="customerApp" class="app">
     <div id="customerForm">
       <div class="header">
-        <h1>🥟 王家饺子铺</h1>
-        <div class="sub">现包现煮 · 小区接单</div>
+        <h1>🥟 妈妈的饺子</h1>
+        <div class="sub">现包现煮</div>
       </div>
 
       <div class="form-group">
@@ -180,25 +211,40 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">🥩 饺子馅</label>
-        <div class="pill-grid" id="fillingPills"></div>
-        <input class="input custom-input" type="text" id="customFilling" placeholder="请输入饺子馅…">
+        <label class="form-label">📅 哪天要</label>
+        <div class="toggle-row">
+          <button class="toggle-btn selected" id="btnDay1" onclick="setDeliveryDay(0)"></button>
+          <button class="toggle-btn" id="btnDay2" onclick="setDeliveryDay(1)"></button>
+        </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">⚖️ 要多少</label>
+        <label class="form-label">🥩 饺子馅</label>
+        <div class="pill-grid" id="fillingPills"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📦 份量</label>
+        <div class="toggle-row">
+          <button class="toggle-btn selected" id="btnLarge" onclick="setPortion('large')">🥟 大份（15个）</button>
+          <button class="toggle-btn" id="btnSmall" onclick="setPortion('small')">🫓 小份（12个）</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🔢 数量</label>
         <div class="weight-row">
-          <button class="weight-btn" onclick="adjustWeight(-0.5)">−</button>
-          <span class="weight-display" id="weightDisplay">1</span>
-          <span class="weight-unit">斤</span>
-          <button class="weight-btn" onclick="adjustWeight(0.5)">+</button>
+          <button class="weight-btn" onclick="adjustQty(-1)">−</button>
+          <span class="weight-display" id="qtyDisplay">1</span>
+          <span class="weight-unit">份</span>
+          <button class="weight-btn" onclick="adjustQty(1)">+</button>
         </div>
         <div class="weight-quicks">
-          <button class="weight-quick" onclick="setWeight(0.5)">半斤</button>
-          <button class="weight-quick" onclick="setWeight(1)">1斤</button>
-          <button class="weight-quick" onclick="setWeight(2)">2斤</button>
-          <button class="weight-quick" onclick="setWeight(3)">3斤</button>
-          <button class="weight-quick" onclick="setWeight(5)">5斤</button>
+          <button class="weight-quick" onclick="setQty(1)">1份</button>
+          <button class="weight-quick" onclick="setQty(2)">2份</button>
+          <button class="weight-quick" onclick="setQty(3)">3份</button>
+          <button class="weight-quick" onclick="setQty(5)">5份</button>
+          <button class="weight-quick" onclick="setQty(10)">10份</button>
         </div>
       </div>
 
@@ -217,22 +263,69 @@
 
       <button class="btn-submit" onclick="customerSubmit()">提交订单 🥟</button>
 
-      <div class="admin-link">
-        <a href="?admin">店主入口</a>
+      <div style="text-align:center;margin-top:24px;">
+        <button class="btn-text" onclick="showCustomerHistory()">📋 查看我的历史订单</button>
       </div>
     </div>
 
-    <!-- Success screen -->
     <div id="successScreen" class="success-screen" style="display:none">
       <div class="emoji">✅</div>
       <h2>下单成功！</h2>
-      <p>已经通知老板啦<br>饺子正在包，一会儿就好 🥟</p>
+      <p id="successMsg">已经通知老板啦<br>饺子正在包，一会儿就好 🥟</p>
       <button class="btn-new-order" onclick="resetCustomerForm()">再来一单</button>
+    </div>
+
+    <!-- 顾客历史订单 -->
+    <div id="historyScreen" style="display:none">
+      <div class="header">
+        <h1>📋 我的订单</h1>
+        <div class="sub" id="historyTitle"></div>
+      </div>
+      <div class="order-list" id="historyList"></div>
+      <div class="empty-state" id="historyEmpty" style="display:none">
+        <div class="emoji">🔍</div>
+        <h3>没有找到订单</h3>
+        <p>换个名字试试</p>
+      </div>
+      <div style="text-align:center;margin-top:24px;">
+        <button class="btn-new-order" onclick="document.getElementById('historyScreen').style.display='none';document.getElementById('customerForm').style.display='';">← 返回下单</button>
+      </div>
     </div>
   </div>
 
-  <!-- ━━ ADMIN 店主接单面板 ━━ -->
+  <!-- ━━ 店主接单面板 ━━ -->
   <div id="adminApp" class="app" style="display:none">
+
+    <!-- PIN 锁屏 -->
+    <div id="pinScreen" class="pin-screen">
+      <div class="emoji">🔐</div>
+      <h2>店主密码</h2>
+      <p>输入密码查看订单</p>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key" onclick="pinPress('')" style="visibility:hidden"></button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key delete" onclick="pinDelete()">⌫</button>
+      </div>
+      <button class="pin-back" onclick="window.location.href='index.html'">← 回到顾客页面</button>
+    </div>
+
+    <!-- 面板内容 -->
+    <div id="adminContent" style="display:none">
     <div class="conn-status offline" id="connStatus">⏳ 连接中…</div>
 
     <div class="header">
@@ -240,474 +333,640 @@
       <div class="sub">实时接单面板</div>
     </div>
 
+    <div class="date-nav">
+      <button class="date-nav-arrow" onclick="goDate(-1)">◀</button>
+      <span class="date-nav-label" id="dateLabel">今天</span>
+      <button class="date-nav-arrow" onclick="goDate(1)">▶</button>
+    </div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <button class="date-nav-today" onclick="goToday()">回到今天</button>
+    </div>
+
     <div class="tabs">
       <button class="tab active" data-tab="pending" onclick="adminSwitchTab('pending')">
         待做 <span class="badge" id="adminBadge" style="display:none">0</span>
       </button>
       <button class="tab" data-tab="done" onclick="adminSwitchTab('done')">
-        已完成
+        已做好
+      </button>
+      <button class="tab" data-tab="delivered" onclick="adminSwitchTab('delivered')">
+        已送达
       </button>
     </div>
 
-    <!-- Stats -->
     <div class="stats-bar">
-      <div class="stat-card total"><div class="stat-value" id="statTotal">0</div><div class="stat-label">今日订单</div></div>
-      <div class="stat-card pending"><div class="stat-value" id="statPending">0</div><div class="stat-label">待完成</div></div>
-      <div class="stat-card done"><div class="stat-value" id="statDone">0</div><div class="stat-label">已完成</div></div>
+      <div class="stat-card total"><div class="stat-value" id="statTotal">-</div><div class="stat-label">当天订单</div></div>
+      <div class="stat-card pending"><div class="stat-value" id="statPending">-</div><div class="stat-label">待做</div></div>
+      <div class="stat-card done"><div class="stat-value" id="statDone">-</div><div class="stat-label">已做好</div></div>
+      <div class="stat-card delivered"><div class="stat-value" id="statDelivered">-</div><div class="stat-label">已送达</div></div>
     </div>
 
-    <!-- Pending orders -->
+    <!-- 今日统计 -->
+    <div class="summary-card">
+      <button class="summary-toggle" onclick="toggleSummary()">
+        <span>📊 今日统计</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="summary-body" id="summaryBody">
+        <div class="summary-row">
+          <span class="label">📋 总订单数</span>
+          <span class="value" id="sumOrders">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">💰 总金额</span>
+          <span class="value highlight" id="sumRevenue">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">🥟 饺子总数</span>
+          <span class="value dumplings" id="sumDumplings">-</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span class="label">🔥 煮熟 / ❄️ 生的</span>
+          <span class="value" id="sumCookType">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">🥟 大份 / 小份</span>
+          <span class="value" id="sumPortion">-</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-light);margin-bottom:4px;">按馅料 🔽</div>
+        <div id="sumFillings" style="margin-bottom:8px;"></div>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span class="label">🟢 应收款项（已做好+已送达）</span>
+          <span class="value" id="sumCollected" style="color:#27AE60;">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 待做 -->
     <div id="pendingSection">
       <div class="section-header">
-        <div class="section-title">🟠 待完成 <span class="section-count" id="pendingCount"></span></div>
+        <div class="section-title">🟠 待做 <span class="section-count" id="pendingCount"></span></div>
         <button class="btn-text" onclick="completeAll()" id="btnCompleteAll" style="display:none">全部完成</button>
       </div>
       <div class="order-list" id="pendingList"></div>
       <div class="empty-state" id="pendingEmpty">
         <div class="emoji">🎉</div>
-        <h3>没有待完成的订单</h3>
+        <h3>没有待做的订单</h3>
         <p>顾客下单后会实时出现在这里</p>
       </div>
     </div>
 
-    <!-- Done orders -->
+    <!-- 已做好 -->
     <div id="doneSection" style="display:none">
       <div class="section-header" style="margin-top:24px">
-        <div class="section-title">🟢 已完成 <span class="section-count" id="doneCount"></span></div>
-        <button class="btn-text danger" onclick="clearCompleted()" id="btnClearCompleted" style="display:none">清空已完成</button>
+        <div class="section-title">🟢 已做好 <span class="section-count" id="doneCount"></span></div>
+        <button class="btn-text" onclick="deliverAll()" id="btnDeliverAll" style="display:none">全部送达</button>
       </div>
       <div class="order-list" id="doneList"></div>
       <div class="empty-state" id="doneEmpty">
         <div class="emoji">📋</div>
-        <h3>还没有完成的订单</h3>
-        <p>点击订单上的「✓ 做好了」来标记完成</p>
+        <h3>还没有做好的订单</h3>
       </div>
     </div>
+
+    <!-- 已送达 -->
+    <div id="deliveredSection" style="display:none">
+      <div class="section-header" style="margin-top:24px">
+        <div class="section-title">🔵 已送达 <span class="section-count" id="deliveredCount"></span></div>
+        <button class="btn-text danger" onclick="clearDelivered()" id="btnClearDelivered" style="display:none">清空已送达</button>
+      </div>
+      <div class="order-list" id="deliveredList"></div>
+      <div class="empty-state" id="deliveredEmpty">
+        <div class="emoji">📦</div>
+        <h3>还没有送达的订单</h3>
+      </div>
+    </div>
+    </div><!-- /adminContent -->
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━ Supabase 初始化 ━━━━━━━━━━━━━━━━━━
-const SUPABASE_URL = 'https://kpyrqhrpyfyelvjowpdd.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_-pkkDqnWl4mQw-1qJGQirg_JHLbC9O4';
+var API = 'https://kpyrqhrpyfyelvjowpdd.supabase.co/rest/v1/orders';
+var KEY = 'sb_publishable_-pkkDqnWl4mQw-1qJGQirg_JHLbC9O4';
+var HEADERS = {
+  'apikey': KEY, 'Authorization': 'Bearer ' + KEY,
+  'Content-Type': 'application/json', 'Prefer': 'return=representation'
+};
 
-let supabase;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch (e) {
-  console.error('Supabase init error:', e);
-}
-
-const FILLINGS = [
-  '猪肉白菜', '猪肉韭菜', '猪肉芹菜', '韭菜鸡蛋',
-  '猪肉大葱', '牛肉大葱', '猪肉茴香', '三鲜馅',
-  '素三鲜', '猪肉酸菜', '羊肉大葱', '其他'
+var FILLINGS = [
+  '酸菜黑猪肉', '香菇黑猪肉', '韭菜鸡蛋(素)', '茴香黑猪肉',
+  '芹菜黑猪肉', '芝士玉米黑猪肉', '猪肉大葱', '香菜香辣黑猪肉',
+  '虾仁三鲜', '烧椒皮蛋鲜肉', '金针菇黑猪肉', '牛肉大葱',
+  '韭菜黑猪肉'
 ];
 
-const IS_ADMIN = window.location.search.includes('admin');
+var PRICES = {
+  '酸菜黑猪肉': {large:25,small:20}, '香菇黑猪肉': {large:25,small:20},
+  '韭菜鸡蛋(素)': {large:20,small:16}, '茴香黑猪肉': {large:22,small:18},
+  '芹菜黑猪肉': {large:22,small:18}, '芝士玉米黑猪肉': {large:29,small:29},
+  '猪肉大葱': {large:22,small:18}, '香菜香辣黑猪肉': {large:25,small:20},
+  '虾仁三鲜': {large:28,small:23}, '烧椒皮蛋鲜肉': {large:29,small:29},
+  '金针菇黑猪肉': {large:22,small:18}, '牛肉大葱': {large:28,small:23},
+  '韭菜黑猪肉': {large:22,small:18}
+};
 
-// ━━━━━━━━━━━━━━━━━━ 通用工具 ━━━━━━━━━━━━━━━━━━
-function escapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+var IS_ADMIN = window.location.search.indexOf('admin') !== -1;
+
+// ========== 工具 ==========
+function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function dateStr(d) { return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function dateLabel(d) {
+  var today = dateStr(new Date());
+  var yesterday = dateStr(new Date(Date.now()-86400000));
+  var tomorrow = dateStr(new Date(Date.now()+86400000));
+  var ds = dateStr(d);
+  if (ds === today) return '今天';
+  if (ds === yesterday) return '昨天';
+  if (ds === tomorrow) return '明天';
+  return (d.getMonth()+1)+'月'+d.getDate()+'日';
 }
-function formatWeight(w) { return w % 1 === 0 ? w : w.toFixed(1); }
-
-function timeAgo(isoStr) {
-  const now = Date.now();
-  const then = new Date(isoStr).getTime();
-  const diffMin = Math.floor((now - then) / 60000);
-  if (diffMin < 1) return '刚刚';
-  if (diffMin < 60) return `${diffMin}分钟前`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour}小时前`;
-  const d = new Date(isoStr);
-  return `${d.getMonth()+1}-${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+function timeAgo(iso) {
+  var diff = Math.floor((Date.now() - new Date(iso).getTime())/60000);
+  if (diff < 1) return '刚刚';
+  if (diff < 60) return diff+'分钟前';
+  var h = Math.floor(diff/60);
+  if (h < 24) return h+'小时前';
+  var d = new Date(iso);
+  return (d.getMonth()+1)+'-'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
-
-function todayStart() {
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  return d.toISOString();
-}
-
 function showToast(msg) {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
+  var c = document.getElementById('toastContainer');
+  var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   c.appendChild(t);
-  setTimeout(() => { t.classList.add('leaving'); t.addEventListener('animationend', () => t.remove()); }, 3000);
+  setTimeout(function(){ t.classList.add('leaving'); t.addEventListener('animationend',function(){ t.remove(); }); },3000);
 }
 
-// ━━━━━━━━━━━━━━━━━━ 顾客端 ━━━━━━━━━━━━━━━━━━
-let customerState = { selectedFilling: null, weight: 1, cookType: 'cooked' };
+// ========== 顾客端 ==========
+var cust = { filling: null, cookType: 'cooked', deliveryDate: 'today', portion: 'large', qty: 1 };
+
+function updateDateButtons() {
+  var d1 = new Date(), d2 = new Date(Date.now()+86400000);
+  document.getElementById('btnDay1').textContent = (d1.getMonth()+1)+'月'+d1.getDate()+'日（今天）';
+  document.getElementById('btnDay2').textContent = (d2.getMonth()+1)+'月'+d2.getDate()+'日（明天）';
+}
 
 function renderFillingPills() {
-  const c = document.getElementById('fillingPills');
-  c.innerHTML = FILLINGS.map(f =>
-    `<button class="pill${customerState.selectedFilling === f ? ' selected' : ''}" onclick="selectFilling('${f}')">${f}</button>`
-  ).join('');
-  const ci = document.getElementById('customFilling');
-  if (customerState.selectedFilling === '其他') {
-    ci.classList.add('show');
-    setTimeout(() => ci.focus(), 100);
-  } else {
-    ci.classList.remove('show');
-    ci.value = '';
+  var h = '';
+  for (var i = 0; i < FILLINGS.length; i++) {
+    var f = FILLINGS[i], sel = cust.filling === f ? ' selected' : '';
+    var p = cust.portion === 'small' ? PRICES[f].small : PRICES[f].large;
+    h += '<button class="pill'+sel+'" onclick="selectFilling(\''+f+'\')">'+f+' '+p+'元</button>';
   }
+  document.getElementById('fillingPills').innerHTML = h;
 }
 
-function selectFilling(f) { customerState.selectedFilling = f; renderFillingPills(); }
+function selectFilling(f) { cust.filling = f; renderFillingPills(); }
 
-function adjustWeight(d) {
-  customerState.weight = Math.max(0.5, Math.round((customerState.weight + d) * 10) / 10);
-  document.getElementById('weightDisplay').textContent = formatWeight(customerState.weight);
+function setDeliveryDay(off) {
+  cust.deliveryDate = off === 0 ? 'today' : 'tomorrow';
+  document.getElementById('btnDay1').className = 'toggle-btn'+(off===0?' selected':'');
+  document.getElementById('btnDay2').className = 'toggle-btn'+(off===1?' selected':'');
 }
 
-function setWeight(w) {
-  customerState.weight = w;
-  document.getElementById('weightDisplay').textContent = formatWeight(w);
+function setPortion(p) {
+  cust.portion = p;
+  document.getElementById('btnLarge').className = 'toggle-btn'+(p==='large'?' selected':'');
+  document.getElementById('btnSmall').className = 'toggle-btn'+(p==='small'?' selected':'');
+  renderFillingPills();
+}
+
+function adjustQty(d) {
+  cust.qty = Math.max(1, cust.qty + d);
+  document.getElementById('qtyDisplay').textContent = cust.qty;
+}
+
+function setQty(v) {
+  cust.qty = v;
+  document.getElementById('qtyDisplay').textContent = cust.qty;
 }
 
 function setCookType(t) {
-  customerState.cookType = t;
-  document.getElementById('btnCooked').classList.toggle('selected', t === 'cooked');
-  document.getElementById('btnRaw').classList.toggle('selected', t === 'raw');
+  cust.cookType = t;
+  document.getElementById('btnCooked').className = 'toggle-btn'+(t==='cooked'?' selected':'');
+  document.getElementById('btnRaw').className = 'toggle-btn'+(t==='raw'?' selected':'');
 }
 
-function getFillingValue() {
-  if (customerState.selectedFilling === '其他') {
-    const v = document.getElementById('customFilling').value.trim();
-    return v || '未指定';
-  }
-  return customerState.selectedFilling || '未指定';
+function getDeliveryDateISO() {
+  var d = new Date();
+  if (cust.deliveryDate === 'tomorrow') d.setDate(d.getDate()+1);
+  return dateStr(d);
 }
 
 async function customerSubmit() {
-  const name = document.getElementById('customerName').value.trim();
-  const filling = getFillingValue();
-  const weight = customerState.weight;
-  const type = customerState.cookType;
-  const notes = document.getElementById('notes').value.trim();
+  var name = document.getElementById('customerName').value.trim();
+  var dd = getDeliveryDateISO();
+  var filling = cust.filling;
+  var portion = cust.portion;
+  var qty = cust.qty;
+  var type = cust.cookType;
+  var notes = document.getElementById('notes').value.trim();
 
-  if (!name) { showToast('⚠️ 请填写您的称呼'); document.getElementById('customerName').focus(); return; }
-  if (!customerState.selectedFilling) { showToast('⚠️ 请选择饺子馅'); return; }
-  if (customerState.selectedFilling === '其他' && !document.getElementById('customFilling').value.trim()) {
-    showToast('⚠️ 请输入饺子馅'); document.getElementById('customFilling').focus(); return;
+  if (!name) { showToast('请填写您的称呼'); document.getElementById('customerName').focus(); return; }
+  if (!filling) { showToast('请选择饺子馅'); return; }
+
+  var btn = document.querySelector('#customerApp .btn-submit');
+  btn.disabled = true; btn.textContent = '提交中…';
+
+  try {
+    var resp = await fetch(API, { method:'POST', headers:HEADERS, body: JSON.stringify({
+      customer_name:name, delivery_date:dd, filling:filling,
+      portion:portion, qty:qty, type:type, notes:notes, status:'pending'
+    })});
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+  } catch(e) {
+    console.error(e); showToast('提交失败，请检查网络后重试');
+    btn.disabled = false; btn.textContent = '提交订单 🥟'; return;
   }
 
-  const btn = document.querySelector('#customerApp .btn-submit');
-  btn.disabled = true;
-  btn.textContent = '提交中…';
-
-  const { error } = await supabase.from('orders').insert({
-    customer_name: name,
-    filling: filling,
-    weight: weight,
-    type: type,
-    notes: notes,
-    status: 'pending'
-  });
-
-  if (error) {
-    console.error('Submit error:', error);
-    showToast('⚠️ 提交失败，请检查网络后重试');
-    btn.disabled = false;
-    btn.textContent = '提交订单 🥟';
-    return;
-  }
-
+  var dt = cust.deliveryDate === 'today' ? '今天' : '明天';
+  document.getElementById('successMsg').innerHTML = '已经通知老板啦<br>'+dt+'来取饺子 🥟';
   document.getElementById('customerForm').style.display = 'none';
   document.getElementById('successScreen').style.display = '';
-  btn.disabled = false;
-  btn.textContent = '提交订单 🥟';
+  btn.disabled = false; btn.textContent = '提交订单 🥟';
 }
 
 function resetCustomerForm() {
   document.getElementById('customerName').value = '';
-  customerState.selectedFilling = null;
-  customerState.weight = 1;
-  customerState.cookType = 'cooked';
+  cust.filling = null; cust.cookType = 'cooked'; cust.deliveryDate = 'today'; cust.portion = 'large'; cust.qty = 1;
   document.getElementById('notes').value = '';
   renderFillingPills();
-  document.getElementById('weightDisplay').textContent = '1';
-  document.getElementById('btnCooked').classList.add('selected');
-  document.getElementById('btnRaw').classList.remove('selected');
+  document.getElementById('btnCooked').className = 'toggle-btn selected';
+  document.getElementById('btnRaw').className = 'toggle-btn';
+  document.getElementById('btnDay1').className = 'toggle-btn selected';
+  document.getElementById('btnDay2').className = 'toggle-btn';
+  document.getElementById('btnLarge').className = 'toggle-btn selected';
+  document.getElementById('btnSmall').className = 'toggle-btn';
+  document.getElementById('qtyDisplay').textContent = '1';
   document.getElementById('customerForm').style.display = '';
   document.getElementById('successScreen').style.display = 'none';
+  document.getElementById('historyScreen').style.display = 'none';
 }
 
-// ━━━━━━━━━━━━━━━━━━ 店主端 ━━━━━━━━━━━━━━━━━━
-let allOrders = [];
-let currentAdminTab = 'pending';
-let realtimeChannel = null;
+// ========== 顾客历史 ==========
+function showCustomerHistory() {
+  var name = document.getElementById('customerName').value.trim();
+  if (!name) { showToast('请先填写您的称呼再查看'); return; }
+  loadCustomerHistory(name);
+}
+
+async function loadCustomerHistory(name) {
+  document.getElementById('customerForm').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'none';
+  document.getElementById('historyScreen').style.display = '';
+
+  document.getElementById('historyTitle').textContent = name + ' 的历史订单';
+
+  try {
+    var url = API+'?select=*&customer_name=ilike.'+encodeURIComponent('%'+name+'%')+'&order=created_at.desc&limit=20';
+    var resp = await fetch(url, { headers:{ 'apikey':KEY, 'Authorization':'Bearer '+KEY }});
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    var data = await resp.json();
+
+    if (data.length === 0) {
+      document.getElementById('historyList').innerHTML = '';
+      document.getElementById('historyEmpty').style.display = '';
+    } else {
+      document.getElementById('historyEmpty').style.display = 'none';
+      var html = '';
+      for (var i = 0; i < data.length; i++) {
+        var o = data[i];
+        var oq = o.qty || 1;
+        var stLabel = o.status==='pending'?'🟠 待做':(o.status==='done'?'🟢 已做好':'🔵 已送达');
+        var paidLabel = o.paid?'💰 已收款':'';
+        var ps = ((PRICES[o.filling]&&PRICES[o.filling][o.portion])?PRICES[o.filling][o.portion]:0) * oq;
+        html += '<div class="order-card pending" style="cursor:default;">'+
+          '<div class="order-row1">'+
+            '<span class="order-name">'+escapeHtml(o.filling)+'</span>'+
+            '<span class="order-date">📅 '+dateLabel(new Date(o.delivery_date+'T00:00:00'))+' · '+timeAgo(o.created_at)+'</span>'+
+          '</div>'+
+          '<div class="order-row2">'+
+            '<span>'+(o.portion==='small'?'小份(12个)':'大份(15个)')+(oq>1?' ×'+oq:'')+'</span>'+
+            ' · <span>'+(o.type==='cooked'?'🔥 煮熟':'❄️ 生的')+'</span>'+
+            ' · <span style="font-weight:700;">¥'+ps+'</span>'+
+          '</div>'+
+          '<div style="margin-top:4px;">'+stLabel+' '+paidLabel+'</div>'+
+        '</div>';
+      }
+      document.getElementById('historyList').innerHTML = html;
+    }
+  } catch(e) { console.error(e); showToast('加载失败'); }
+}
+
+// ========== 店主端 ==========
+var allOrders = [], curTab = 'pending', pollTimer = null, selectedDate = '', pinInput = '';
+var PIN = '0503';
+
+function goToday() { selectedDate = dateStr(new Date()); updateDateUI(); loadOrders(); }
+function goDate(delta) {
+  var d = new Date(selectedDate+'T00:00:00'); d.setDate(d.getDate()+delta);
+  selectedDate = dateStr(d); updateDateUI(); loadOrders();
+}
+function updateDateUI() { document.getElementById('dateLabel').textContent = dateLabel(new Date(selectedDate+'T00:00:00')); }
 
 async function loadOrders() {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .gte('created_at', todayStart())
-    .order('created_at', { ascending: false });
-
-  if (error) { console.error('Load error:', error); return; }
-  allOrders = data || [];
-  renderAdmin();
+  try {
+    var url = API+'?select=*&delivery_date=eq.'+encodeURIComponent(selectedDate)+'&order=created_at.desc';
+    var resp = await fetch(url, { headers:{ 'apikey':KEY, 'Authorization':'Bearer '+KEY }});
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    allOrders = await resp.json();
+    renderAdmin(); updateConnStatus(true);
+  } catch(e) { console.error(e); updateConnStatus(false); }
 }
 
-function setupRealtime() {
-  realtimeChannel = supabase
-    .channel('orders-realtime')
-    .on('postgres_changes',
-      { event: '*', schema: 'public', table: 'orders' },
-      (payload) => {
-        // Only handle today's orders
-        const order = payload.new;
-        const eventType = payload.eventType;
-
-        if (eventType === 'INSERT') {
-          // Check if it's already in the list (local insert)
-          if (!allOrders.find(o => o.id === order.id)) {
-            allOrders.unshift(order);
-            renderAdmin();
-            // Brief highlight animation
-            setTimeout(() => {
-              const cards = document.querySelectorAll('.order-card');
-              cards.forEach(c => {
-                if (c.dataset.id === order.id) c.classList.add('new-order');
-              });
-            }, 100);
-            setTimeout(() => {
-              document.querySelectorAll('.order-card.new-order').forEach(c => c.classList.remove('new-order'));
-            }, 2000);
-          }
-        } else if (eventType === 'UPDATE') {
-          const idx = allOrders.findIndex(o => o.id === order.id);
-          if (idx !== -1) {
-            allOrders[idx] = order;
-          } else {
-            allOrders.unshift(order);
-          }
-          renderAdmin();
-        } else if (eventType === 'DELETE') {
-          allOrders = allOrders.filter(o => o.id !== payload.old.id);
-          renderAdmin();
-        }
-      })
-    .subscribe();
-}
-
-function updateConnStatus(online) {
-  const s = document.getElementById('connStatus');
-  if (online) {
-    s.textContent = '🟢 在线';
-    s.className = 'conn-status online';
-  } else {
-    s.textContent = '🔴 离线';
-    s.className = 'conn-status offline';
-  }
+function updateConnStatus(on) {
+  var s = document.getElementById('connStatus');
+  s.textContent = on ? '🟢 在线' : '🔴 离线';
+  s.className = 'conn-status '+(on?'online':'offline');
 }
 
 function renderAdmin() {
-  const pendingOrders = allOrders.filter(o => o.status === 'pending');
-  const doneOrders = allOrders.filter(o => o.status === 'done');
+  var pend = allOrders.filter(function(o){return o.status==='pending';});
+  var done = allOrders.filter(function(o){return o.status==='done';});
+  var delv = allOrders.filter(function(o){return o.status==='delivered';});
 
-  // Stats
   document.getElementById('statTotal').textContent = allOrders.length;
-  document.getElementById('statPending').textContent = pendingOrders.length;
-  document.getElementById('statDone').textContent = doneOrders.length;
+  document.getElementById('statPending').textContent = pend.length;
+  document.getElementById('statDone').textContent = done.length;
+  document.getElementById('statDelivered').textContent = delv.length;
 
-  // Badge
-  const badge = document.getElementById('adminBadge');
-  if (pendingOrders.length > 0) {
-    badge.style.display = 'flex';
-    badge.textContent = pendingOrders.length;
+  var badge = document.getElementById('adminBadge');
+  if (pend.length > 0) { badge.style.display='flex'; badge.textContent=pend.length; }
+  else { badge.style.display='none'; }
+
+  renderSection('pendingList','pendingEmpty',pend,'btnCompleteAll');
+  renderSection('doneList','doneEmpty',done,'btnDeliverAll');
+  renderSection('deliveredList','deliveredEmpty',delv,'btnClearDelivered');
+
+  document.getElementById('pendingCount').textContent = pend.length>0?'('+pend.length+')':'';
+  document.getElementById('doneCount').textContent = done.length>0?'('+done.length+')':'';
+  document.getElementById('deliveredCount').textContent = delv.length>0?'('+delv.length+')':'';
+
+  computeSummary();
+}
+
+function renderSection(listId, emptyId, orders, btnId) {
+  var list = document.getElementById(listId), empty = document.getElementById(emptyId);
+  var btn = document.getElementById(btnId);
+  if (orders.length > 0) {
+    list.innerHTML = orders.map(renderOrderCard).join('');
+    empty.style.display = 'none'; btn.style.display = '';
   } else {
-    badge.style.display = 'none';
+    list.innerHTML = ''; empty.style.display = ''; btn.style.display = 'none';
+  }
+}
+
+function computeSummary() {
+  var total = allOrders.length;
+  var revenue = 0, dumplings = 0, cooked = 0, raw = 0, large = 0, small = 0, collected = 0, paidRevenue = 0;
+  var fillingMap = {}; // filling -> [orders]
+
+  for (var i = 0; i < allOrders.length; i++) {
+    var o = allOrders[i];
+    var qty = o.qty || 1;
+    var p = (o.portion === 'small' ? 12 : 15) * qty;
+    dumplings += p;
+    if (o.portion === 'large') large += qty; else small += qty;
+    if (o.type === 'cooked') cooked += qty; else raw += qty;
+
+    var price = ((PRICES[o.filling] && PRICES[o.filling][o.portion]) ? PRICES[o.filling][o.portion] : 0) * qty;
+    revenue += price;
+    if (o.status === 'done' || o.status === 'delivered') collected += price;
+    if (o.paid) paidRevenue += price;
+
+    if (!fillingMap[o.filling]) fillingMap[o.filling] = { totalQty: 0, totalPrice: 0, orders: [] };
+    fillingMap[o.filling].totalQty += qty;
+    fillingMap[o.filling].totalPrice += price;
+    fillingMap[o.filling].orders.push(o);
   }
 
-  // Pending list
-  const pendingList = document.getElementById('pendingList');
-  const pendingEmpty = document.getElementById('pendingEmpty');
-  const btnCompleteAll = document.getElementById('btnCompleteAll');
-  if (pendingOrders.length > 0) {
-    pendingList.innerHTML = pendingOrders.map(o => renderOrderCard(o)).join('');
-    pendingEmpty.style.display = 'none';
-    btnCompleteAll.style.display = '';
-  } else {
-    pendingList.innerHTML = '';
-    pendingEmpty.style.display = '';
-    btnCompleteAll.style.display = 'none';
-  }
-  document.getElementById('pendingCount').textContent = pendingOrders.length > 0 ? `(${pendingOrders.length})` : '';
+  document.getElementById('sumOrders').textContent = total + ' 单';
+  document.getElementById('sumRevenue').textContent = '¥' + revenue;
+  document.getElementById('sumDumplings').textContent = dumplings + ' 个';
+  document.getElementById('sumCookType').textContent = cooked + ' / ' + raw;
+  document.getElementById('sumPortion').textContent = large + ' / ' + small;
+  document.getElementById('sumCollected').textContent = '¥' + collected + ' 应收';
 
-  // Done list
-  const doneList = document.getElementById('doneList');
-  const doneEmpty = document.getElementById('doneEmpty');
-  const btnClearCompleted = document.getElementById('btnClearCompleted');
-  if (doneOrders.length > 0) {
-    doneList.innerHTML = doneOrders.map(o => renderOrderCard(o)).join('');
-    doneEmpty.style.display = 'none';
-    btnClearCompleted.style.display = '';
-  } else {
-    doneList.innerHTML = '';
-    doneEmpty.style.display = '';
-    btnClearCompleted.style.display = 'none';
+  // Filling breakdown - clickable to show customers
+  var keys = Object.keys(fillingMap).sort(function(a,b){ return fillingMap[b].orders.length - fillingMap[a].orders.length; });
+  var html = '';
+  for (var k = 0; k < keys.length; k++) {
+    var filling = keys[k];
+    var data = fillingMap[filling];
+    html += '<div class="summary-filling-row" onclick="toggleFillingDetail(\''+k+'\')" style="cursor:pointer;">'+
+      '<span>▶ '+filling+'</span><span class="count">'+data.orders.length+' 单 · '+data.totalQty+'份 · ¥'+data.totalPrice+'</span></div>'+
+      '<div class="filling-detail filling-detail-'+k+'">';
+    for (var m = 0; m < data.orders.length; m++) {
+      var ord = orders[m];
+      var oqty = ord.qty || 1;
+      var ps = ((PRICES[ord.filling] && PRICES[ord.filling][ord.portion]) ? PRICES[ord.filling][ord.portion] : 0) * oqty;
+      html += '<div class="filling-detail-row">'+
+        '<span><span class="customer">'+escapeHtml(ord.customer_name)+'</span>'+
+        '<span class="dots"> · </span>'+ (ord.portion==='small'?'小份(12个)':'大份(15个)') + (oqty>1?' ×'+oqty:'') +
+        '<span class="dots"> · </span>¥'+ps+'</span>'+
+        '<span style="font-size:11px;'+(ord.paid?'color:#27AE60;':'color:#E74C3C;')+'">'+(ord.paid?'已收':'未收')+'</span>'+
+      '</div>';
+    }
+    html += '</div>';
   }
-  document.getElementById('doneCount').textContent = doneOrders.length > 0 ? `(${doneOrders.length})` : '';
+  document.getElementById('sumFillings').innerHTML = html || '<div class="summary-filling-row"><span>暂无</span></div>';
+}
+
+function toggleSummary() {
+  var body = document.getElementById('summaryBody');
+  var toggle = document.querySelector('.summary-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function toggleFillingDetail(idx) {
+  var detail = document.querySelector('.filling-detail-'+idx);
+  var row = detail.previousElementSibling;
+  detail.classList.toggle('open');
+  var arrow = row.querySelector('span');
+  if (detail.classList.contains('open')) {
+    row.innerHTML = row.innerHTML.replace('▶','▼');
+  } else {
+    row.innerHTML = row.innerHTML.replace('▼','▶');
+  }
 }
 
 function renderOrderCard(order) {
-  const isPending = order.status === 'pending';
-  const statusClass = isPending ? 'pending' : 'done';
-  const typeClass = order.type === 'cooked' ? 'cooked' : 'raw';
-  const typeLabel = order.type === 'cooked' ? '🔥 煮熟' : '❄️ 生的';
+  var st = order.status;
+  var cls = st==='pending'?'pending':(st==='done'?'done':('delivered'+(order.paid?' paid-done':'')));
+  var tc = order.type==='cooked'?'cooked':'raw';
+  var tl = order.type==='cooked'?'🔥 煮熟':'❄️ 生的';
+  var qty = order.qty || 1;
+  var qtyBadge = qty > 1 ? '<span class="qty-badge">×'+qty+'</span>' : '';
+  var pl = (order.portion==='small'?'小份(12个)':'大份(15个)') + qtyBadge;
+  var dl = dateLabel(new Date(order.delivery_date+'T00:00:00'));
+  var paid = order.paid === true;
+  var paidBadge = '<span class="paid-badge '+(paid?'yes':'no')+'">'+(paid?'💰 已收':'💸 未收')+'</span>';
 
-  let actionsHtml = '';
-  if (isPending) {
-    actionsHtml = `
-      <button class="btn-done" onclick="event.stopPropagation(); adminMarkDone('${order.id}')">✓ 做好了</button>
-      <button class="btn-delete" onclick="event.stopPropagation(); adminConfirmDelete('${order.id}')">🗑</button>`;
-  } else {
-    actionsHtml = `
-      <button class="btn-undo" onclick="event.stopPropagation(); adminMarkUndone('${order.id}')">↩ 还没好</button>
-      <button class="btn-delete" onclick="event.stopPropagation(); adminConfirmDelete('${order.id}')">🗑</button>`;
+  var acts = '';
+  if (st === 'pending') {
+    acts = '<button class="btn-done" onclick="event.stopPropagation();adminMark(\''+order.id+'\',\'done\')">✓ 做好了</button>'+
+           '<button class="btn-pay '+(paid?'paid':'')+'" onclick="event.stopPropagation();adminTogglePaid(\''+order.id+'\')">💰 '+(paid?'已收':'未收')+'</button>'+
+           '<button class="btn-delete" onclick="event.stopPropagation();adminConfirmDelete(\''+order.id+'\')">🗑</button>';
+  } else if (st === 'done') {
+    acts = '<button class="btn-deliver" onclick="event.stopPropagation();adminMark(\''+order.id+'\',\'delivered\')">🚀 已送达</button>'+
+           '<button class="btn-pay '+(paid?'paid':'')+'" onclick="event.stopPropagation();adminTogglePaid(\''+order.id+'\')">💰 '+(paid?'已收':'未收')+'</button>'+
+           '<button class="btn-undo" onclick="event.stopPropagation();adminMark(\''+order.id+'\',\'pending\')">↩ 退回</button>'+
+           '<button class="btn-delete" onclick="event.stopPropagation();adminConfirmDelete(\''+order.id+'\')">🗑</button>';
+  } else { // delivered
+    acts = '<button class="btn-pay '+(paid?'paid':'')+'" onclick="event.stopPropagation();adminTogglePaid(\''+order.id+'\')">💰 '+(paid?'已收':'未收')+'</button>'+
+           '<button class="btn-undo" onclick="event.stopPropagation();adminMark(\''+order.id+'\',\'done\')">↩ 退回</button>'+
+           '<button class="btn-delete" onclick="event.stopPropagation();adminConfirmDelete(\''+order.id+'\')">🗑</button>';
   }
 
-  return `
-    <div class="order-card ${statusClass}" data-id="${order.id}" onclick="event.stopPropagation(); adminToggle('${order.id}')">
-      <div class="order-row1">
-        <span class="order-name">${escapeHtml(order.customer_name)}</span>
-        <span class="order-time">${timeAgo(order.created_at)}</span>
-      </div>
-      <div class="order-row2">
-        <span class="order-filling">${escapeHtml(order.filling)}</span>
-        &nbsp;<span class="order-weight">${formatWeight(order.weight)}斤</span>
-        <span class="order-type ${typeClass}">${typeLabel}</span>
-      </div>
-      ${order.notes ? `<div class="order-notes">${escapeHtml(order.notes)}</div>` : ''}
-      ${order.done_at && !isPending ? `<div style="font-size:12px;color:var(--text-light);margin-top:4px;">✅ ${timeAgo(order.done_at)}完成</div>` : ''}
-      <div class="order-actions">${actionsHtml}</div>
-    </div>`;
+  return '<div class="order-card '+cls+'" data-id="'+order.id+'">'+
+    '<div class="order-row1">'+
+      '<span class="order-name">'+escapeHtml(order.customer_name)+paidBadge+'</span>'+
+      '<span class="order-date">📅 '+dl+' · '+timeAgo(order.created_at)+'</span>'+
+    '</div>'+
+    '<div class="order-row2">'+
+      '<span class="order-filling">'+escapeHtml(order.filling)+'</span>'+
+      ' <span class="order-weight">'+pl+'</span>'+
+      '<span class="order-type '+tc+'">'+tl+'</span>'+
+    '</div>'+
+    (order.notes?'<div class="order-notes">'+escapeHtml(order.notes)+'</div>':'')+
+    (order.done_at&&st!=='pending'?'<div style="font-size:12px;color:var(--text-light);margin-top:4px;">✅ '+timeAgo(order.done_at)+(st==='done'?'做好':'')+'</div>':'')+
+    (order.delivered_at&&st==='delivered'?'<div style="font-size:12px;color:var(--deliver);margin-top:4px;">🚀 '+timeAgo(order.delivered_at)+'送达</div>':'')+
+    '<div class="order-actions">'+acts+'</div>'+
+  '</div>';
 }
 
 function adminSwitchTab(tab) {
-  currentAdminTab = tab;
-  document.querySelectorAll('#adminApp .tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`#adminApp .tab[data-tab="${tab}"]`).classList.add('active');
-  document.getElementById('pendingSection').style.display = tab === 'pending' ? '' : 'none';
-  document.getElementById('doneSection').style.display = tab === 'done' ? '' : 'none';
+  curTab = tab;
+  var ts = document.querySelectorAll('#adminApp .tab');
+  for (var i=0;i<ts.length;i++) ts[i].classList.remove('active');
+  document.querySelector('#adminApp .tab[data-tab="'+tab+'"]').classList.add('active');
+  document.getElementById('pendingSection').style.display = tab==='pending'?'':'none';
+  document.getElementById('doneSection').style.display = tab==='done'?'':'none';
+  document.getElementById('deliveredSection').style.display = tab==='delivered'?'':'none';
 }
 
-async function adminMarkDone(id) {
-  const { error } = await supabase.from('orders').update({
-    status: 'done',
-    done_at: new Date().toISOString()
-  }).eq('id', id);
-  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
-  showToast('✅ 做好了！');
+async function adminTogglePaid(id) {
+  var o = findOrder(id); if (!o) return;
+  var newPaid = !o.paid;
+  var oq = o.qty || 1;
+  var price = ((PRICES[o.filling] && PRICES[o.filling][o.portion]) ? PRICES[o.filling][o.portion] : 0) * oq;
+  try {
+    var resp = await fetch(API+'?id=eq.'+encodeURIComponent(id), { method:'PATCH', headers:HEADERS, body:JSON.stringify({paid:newPaid}) });
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    await loadOrders();
+    showToast(newPaid ? '💰 已收款 ¥'+price+' — '+o.customer_name+' · '+o.filling : '⏳ 标记为未收');
+  } catch(e) { console.error(e); showToast('操作失败'); }
 }
 
-async function adminMarkUndone(id) {
-  const { error } = await supabase.from('orders').update({
-    status: 'pending',
-    done_at: null
-  }).eq('id', id);
-  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
-  showToast('↩ 已恢复为待完成');
+async function adminMark(id, newStatus) {
+  var now = new Date().toISOString();
+  var body = { status: newStatus };
+  if (newStatus === 'done') body.done_at = now;
+  else if (newStatus === 'delivered') body.delivered_at = now;
+  else { body.done_at = null; body.delivered_at = null; }
+
+  try {
+    var resp = await fetch(API+'?id=eq.'+encodeURIComponent(id), { method:'PATCH', headers:HEADERS, body:JSON.stringify(body) });
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    await loadOrders();
+    // 自动切到对应 tab
+    var tabName = newStatus === 'done' ? 'done' : (newStatus === 'delivered' ? 'delivered' : 'pending');
+    adminSwitchTab(tabName);
+    showToast(newStatus==='done'?'✅ 做好了！':(newStatus==='delivered'?'🚀 已送达！':'↩ 已退回'));
+  } catch(e) { console.error(e); showToast('操作失败'); }
 }
 
-function adminToggle(id) {
-  const order = allOrders.find(o => o.id === id);
-  if (!order) return;
-  if (order.status === 'pending') adminMarkDone(id);
-  else adminMarkUndone(id);
+function findOrder(id) {
+  for (var i=0;i<allOrders.length;i++) if (allOrders[i].id===id) return allOrders[i];
+  return null;
 }
 
 function adminConfirmDelete(id) {
-  const order = allOrders.find(o => o.id === id);
-  if (!order) return;
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  overlay.innerHTML = `
-    <div class="dialog">
-      <h3>确认删除？</h3>
-      <p>${escapeHtml(order.customer_name)} · ${escapeHtml(order.filling)} · ${formatWeight(order.weight)}斤</p>
-      <div class="dialog-btns">
-        <button class="btn-cancel">取消</button>
-        <button class="btn-confirm">删除</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
-  overlay.querySelector('.btn-confirm').onclick = async () => {
-    overlay.remove();
-    const { error } = await supabase.from('orders').delete().eq('id', id);
-    if (error) { console.error(error); showToast('⚠️ 删除失败'); return; }
-    showToast('🗑 已删除');
+  var o = findOrder(id); if (!o) return;
+  var ov = document.createElement('div'); ov.className = 'overlay';
+  var oq = o.qty || 1;
+  ov.innerHTML = '<div class="dialog"><h3>确认删除？</h3><p>'+escapeHtml(o.customer_name)+' · '+escapeHtml(o.filling)+' · '+(o.portion==='small'?'小份(12个)':'大份(15个)')+(oq>1?' ×'+oq:'')+'</p>'+
+    '<div class="dialog-btns"><button class="btn-cancel">取消</button><button class="btn-confirm">删除</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('.btn-cancel').onclick = function(){ ov.remove(); };
+  ov.querySelector('.btn-confirm').onclick = async function(){
+    ov.remove();
+    try { await fetch(API+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:HEADERS}); await loadOrders(); showToast('🗑 已删除'); }
+    catch(e){ console.error(e); showToast('删除失败'); }
   };
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
 }
 
 async function completeAll() {
-  const pendingIds = allOrders.filter(o => o.status === 'pending').map(o => o.id);
-  if (pendingIds.length === 0) return;
-  const now = new Date().toISOString();
-  const { error } = await supabase.from('orders').update({
-    status: 'done',
-    done_at: now
-  }).in('id', pendingIds);
-  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
-  showToast(`✅ 全部 ${pendingIds.length} 笔订单已完成`);
+  var ids = []; for (var i=0;i<allOrders.length;i++) if (allOrders[i].status==='pending') ids.push(allOrders[i].id);
+  if (!ids.length) return;
+  var now = new Date().toISOString();
+  try { for (var j=0;j<ids.length;j++) await fetch(API+'?id=eq.'+encodeURIComponent(ids[j]),{method:'PATCH',headers:HEADERS,body:JSON.stringify({status:'done',done_at:now})}); await loadOrders(); showToast('✅ 全部 '+ids.length+' 笔已完成'); }
+  catch(e){ console.error(e); showToast('操作失败'); }
 }
 
-function clearCompleted() {
-  const doneIds = allOrders.filter(o => o.status === 'done').map(o => o.id);
-  if (doneIds.length === 0) return;
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  overlay.innerHTML = `
-    <div class="dialog">
-      <h3>清空所有已完成订单？</h3>
-      <p>共 ${doneIds.length} 笔，不可恢复</p>
-      <div class="dialog-btns">
-        <button class="btn-cancel">取消</button>
-        <button class="btn-confirm">清空</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
-  overlay.querySelector('.btn-confirm').onclick = async () => {
-    overlay.remove();
-    const { error } = await supabase.from('orders').delete().in('id', doneIds);
-    if (error) { console.error(error); showToast('⚠️ 清空失败'); return; }
-    showToast('🗑 已清空');
+async function deliverAll() {
+  var ids = []; for (var i=0;i<allOrders.length;i++) if (allOrders[i].status==='done') ids.push(allOrders[i].id);
+  if (!ids.length) return;
+  var now = new Date().toISOString();
+  try { for (var j=0;j<ids.length;j++) await fetch(API+'?id=eq.'+encodeURIComponent(ids[j]),{method:'PATCH',headers:HEADERS,body:JSON.stringify({status:'delivered',delivered_at:now})}); await loadOrders(); showToast('🚀 全部 '+ids.length+' 笔已送达'); }
+  catch(e){ console.error(e); showToast('操作失败'); }
+}
+
+function clearDelivered() {
+  var ids = []; for (var i=0;i<allOrders.length;i++) if (allOrders[i].status==='delivered') ids.push(allOrders[i].id);
+  if (!ids.length) return;
+  var ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = '<div class="dialog"><h3>清空所有已送达订单？</h3><p>共 '+ids.length+' 笔，不可恢复</p>'+
+    '<div class="dialog-btns"><button class="btn-cancel">取消</button><button class="btn-confirm">清空</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('.btn-cancel').onclick = function(){ ov.remove(); };
+  ov.querySelector('.btn-confirm').onclick = async function(){
+    ov.remove();
+    try { for (var j=0;j<ids.length;j++) await fetch(API+'?id=eq.'+encodeURIComponent(ids[j]),{method:'DELETE',headers:HEADERS}); await loadOrders(); showToast('🗑 已清空'); }
+    catch(e){ console.error(e); showToast('清空失败'); }
   };
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
 }
 
-// ━━━━━━━━━━━━━━━━━━ 启动 ━━━━━━━━━━━━━━━━━━
+// ========== PIN ==========
+function pinPress(d) { if (pinInput.length>=4) return; pinInput+=d; updatePinDots(); if (pinInput.length===4) setTimeout(checkPin,300); }
+function pinDelete() { pinInput = pinInput.slice(0,-1); updatePinDots(); }
+function updatePinDots() {
+  var ds = document.querySelectorAll('#pinDots .pin-dot');
+  for (var i=0;i<ds.length;i++) ds[i].className = i<pinInput.length?'pin-dot filled':'pin-dot';
+}
+function checkPin() {
+  if (pinInput === PIN) {
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('adminContent').style.display = '';
+    selectedDate = dateStr(new Date()); updateDateUI();
+    loadOrders().then(function(){ pollTimer = setInterval(loadOrders,3000); });
+    window.addEventListener('online',function(){ updateConnStatus(true); loadOrders(); });
+    window.addEventListener('offline',function(){ updateConnStatus(false); });
+  } else {
+    var ds = document.querySelectorAll('#pinDots .pin-dot');
+    for (var i=0;i<ds.length;i++) ds[i].className = 'pin-dot wrong';
+    setTimeout(function(){ pinInput=''; updatePinDots(); },600);
+  }
+}
+
+// ========== 启动 ==========
 function init() {
   if (IS_ADMIN) {
     document.getElementById('adminApp').style.display = '';
     document.getElementById('customerApp').style.display = 'none';
-    loadOrders().then(() => {
-      setupRealtime();
-      updateConnStatus(true);
-      // Detect offline
-      window.addEventListener('online', () => updateConnStatus(true));
-      window.addEventListener('offline', () => updateConnStatus(false));
-    });
   } else {
     document.getElementById('customerApp').style.display = '';
     document.getElementById('adminApp').style.display = 'none';
-    renderFillingPills();
-    document.getElementById('weightDisplay').textContent = '1';
+    updateDateButtons(); renderFillingPills();
   }
 }
-
 init();
 </script>
 </body>
