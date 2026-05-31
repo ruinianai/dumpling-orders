@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#FFF8F0">
-  <title>饺子订单本</title>
+  <title>🥟 饺子铺</title>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,605 +25,168 @@
       --border: #E8D5C4;
       --shadow: 0 2px 12px rgba(0,0,0,0.06);
       --radius: 12px;
-      --radius-sm: 8px;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      min-height: 100dvh;
+      min-height: 100vh; min-height: 100dvh;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
       -webkit-font-smoothing: antialiased;
     }
 
-    .app {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 16px 16px 100px;
-    }
+    .app { max-width: 480px; margin: 0 auto; padding: 16px 16px 120px; }
 
-    /* Header */
-    .header {
-      text-align: center;
-      padding: 20px 0 8px;
-    }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .header .subtitle {
-      font-size: 14px;
-      color: var(--text-light);
-      margin-top: 4px;
-    }
+    /* ── Header ── */
+    .header { text-align: center; padding: 24px 0 8px; }
+    .header h1 { font-size: 28px; font-weight: 700; }
+    .header .sub { font-size: 14px; color: var(--text-light); margin-top: 4px; }
 
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin: 16px 0;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 4px;
-      box-shadow: var(--shadow);
-    }
-    .tab {
-      flex: 1;
-      padding: 12px 8px;
-      border: none;
-      background: transparent;
-      border-radius: var(--radius-sm);
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--text-light);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      position: relative;
-    }
-    .tab.active {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
-    }
-    .badge {
-      background: var(--danger);
-      color: #fff;
-      font-size: 12px;
-      min-width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 6px;
-      font-weight: 700;
-      position: absolute;
-      top: -6px;
-      right: -6px;
-    }
-    .tab.active .badge {
-      background: #fff;
-      color: var(--primary);
-    }
+    /* ── Tabs (admin) ── */
+    .tabs { display: flex; gap: 8px; margin: 16px 0; background: var(--card); border-radius: var(--radius); padding: 4px; box-shadow: var(--shadow); }
+    .tab { flex: 1; padding: 12px 8px; border: none; background: transparent; border-radius: 8px; font-size: 17px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; position: relative; }
+    .tab.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(230,126,34,0.3); }
+    .badge { background: var(--danger); color: #fff; font-size: 12px; min-width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 0 6px; font-weight: 700; position: absolute; top: -6px; right: -6px; }
+    .tab.active .badge { background: #fff; color: var(--primary); }
 
-    /* Panels */
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* Form */
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-label {
-      display: block;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-
-    /* Customer name input */
-    .input {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 18px;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--card);
-      color: var(--text);
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
-    }
-    .input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
+    /* ── Form ── */
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .input { width: 100%; padding: 14px 16px; font-size: 18px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); transition: border-color 0.2s; -webkit-appearance: none; }
+    .input:focus { outline: none; border-color: var(--primary); }
     .input::placeholder { color: #C0B5A8; }
 
-    /* Filling pills */
-    .pill-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .pill {
-      padding: 10px 16px;
-      font-size: 16px;
-      border: 2px solid var(--border);
-      border-radius: 50px;
-      background: var(--card);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-      font-weight: 500;
-    }
-    .pill:active {
-      transform: scale(0.96);
-    }
-    .pill.selected {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
-    .custom-filling-input {
-      margin-top: 10px;
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      display: none;
-      -webkit-appearance: none;
-    }
-    .custom-filling-input.show { display: block; }
-    .custom-filling-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
+    .pill-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { padding: 10px 16px; font-size: 16px; border: 2px solid var(--border); border-radius: 50px; background: var(--card); color: var(--text); cursor: pointer; transition: all 0.15s; font-weight: 500; }
+    .pill:active { transform: scale(0.96); }
+    .pill.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .custom-input { margin-top: 10px; width: 100%; padding: 12px 16px; font-size: 16px; border: 2px solid var(--border); border-radius: var(--radius); display: none; -webkit-appearance: none; }
+    .custom-input.show { display: block; }
+    .custom-input:focus { outline: none; border-color: var(--primary); }
 
-    /* Weight selector */
-    .weight-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .weight-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: var(--card);
-      font-size: 22px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text);
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
+    .weight-row { display: flex; align-items: center; gap: 10px; }
+    .weight-btn { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border); background: var(--card); font-size: 24px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); flex-shrink: 0; }
     .weight-btn:active { background: #f0f0f0; }
-    .weight-display {
-      font-size: 32px;
-      font-weight: 700;
-      min-width: 80px;
-      text-align: center;
-      color: var(--primary-dark);
-    }
-    .weight-unit {
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text-light);
-    }
-    .weight-quicks {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .weight-quick {
-      padding: 8px 16px;
-      font-size: 15px;
-      border: 2px solid var(--border);
-      border-radius: 50px;
-      background: var(--card);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-weight: 500;
-    }
+    .weight-display { font-size: 34px; font-weight: 700; min-width: 80px; text-align: center; color: var(--primary-dark); }
+    .weight-unit { font-size: 16px; font-weight: 500; color: var(--text-light); }
+    .weight-quicks { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .weight-quick { padding: 8px 16px; font-size: 15px; border: 2px solid var(--border); border-radius: 50px; background: var(--card); cursor: pointer; font-weight: 500; }
     .weight-quick:active { background: #f0f0f0; }
 
-    /* Cook type toggle */
-    .toggle-row {
-      display: flex;
-      gap: 10px;
-    }
-    .toggle-btn {
-      flex: 1;
-      padding: 14px;
-      font-size: 18px;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--card);
-      cursor: pointer;
-      font-weight: 600;
-      text-align: center;
-      transition: all 0.15s;
-    }
-    .toggle-btn.selected {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
+    .toggle-row { display: flex; gap: 10px; }
+    .toggle-btn { flex: 1; padding: 16px; font-size: 18px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--card); cursor: pointer; font-weight: 600; text-align: center; transition: all 0.15s; }
+    .toggle-btn.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* Submit button */
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      font-size: 20px;
-      font-weight: 700;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.15s;
-      box-shadow: 0 4px 16px rgba(230, 126, 34, 0.3);
-      letter-spacing: 1px;
-    }
-    .btn-submit:active {
-      transform: scale(0.98);
-      opacity: 0.9;
-    }
-    .btn-submit:disabled {
-      background: #ccc;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
+    .btn-submit { width: 100%; padding: 18px; font-size: 20px; font-weight: 700; background: var(--primary); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 16px rgba(230,126,34,0.3); letter-spacing: 1px; margin-top: 8px; }
+    .btn-submit:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-submit:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .stat-card {
-      flex: 1;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 14px 10px;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
-    .stat-label {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-top: 2px;
-    }
+    /* ── Success screen ── */
+    .success-screen { text-align: center; padding: 60px 20px; }
+    .success-screen .emoji { font-size: 80px; margin-bottom: 20px; }
+    .success-screen h2 { font-size: 24px; margin-bottom: 8px; color: var(--success); }
+    .success-screen p { font-size: 16px; color: var(--text-light); margin-bottom: 32px; line-height: 1.6; }
+    .btn-new-order { padding: 14px 32px; font-size: 18px; font-weight: 700; background: var(--primary); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
+
+    /* ── Stats (admin) ── */
+    .stats-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .stat-card { flex: 1; background: var(--card); border-radius: var(--radius); padding: 14px 10px; text-align: center; box-shadow: var(--shadow); }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--primary-dark); }
+    .stat-label { font-size: 13px; color: var(--text-light); margin-top: 2px; }
     .stat-card.pending .stat-value { color: #E67E22; }
     .stat-card.done .stat-value { color: #27AE60; }
+    .stat-card.total .stat-value { color: var(--text); }
 
-    /* Section headers */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      margin-top: 4px;
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .section-count {
-      font-size: 14px;
-      color: var(--text-light);
-      font-weight: 500;
-    }
-    .section-actions {
-      display: flex;
-      gap: 8px;
-    }
-    .btn-text {
-      background: none;
-      border: none;
-      font-size: 14px;
-      color: var(--text-light);
-      cursor: pointer;
-      padding: 4px 8px;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 4px; }
+    .section-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .section-count { font-size: 14px; color: var(--text-light); font-weight: 500; }
+    .btn-text { background: none; border: none; font-size: 14px; color: var(--text-light); cursor: pointer; padding: 4px 8px; text-decoration: underline; }
     .btn-text.danger { color: var(--danger); }
 
-    /* Order card */
     .order-list { display: flex; flex-direction: column; gap: 10px; }
-    .order-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      position: relative;
-      transition: all 0.2s;
-      border-left: 4px solid transparent;
-      cursor: pointer;
-    }
-    .order-card.pending {
-      border-left-color: #E67E22;
-    }
-    .order-card.done {
-      border-left-color: #27AE60;
-      opacity: 0.75;
-    }
-    .order-card.done .order-filling,
-    .order-card.done .order-name {
-      text-decoration: line-through;
-      text-decoration-thickness: 2px;
-      text-decoration-color: #ccc;
-    }
+    .order-card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border-left: 4px solid transparent; cursor: pointer; transition: all 0.2s; }
+    .order-card.pending { border-left-color: #E67E22; }
+    .order-card.done { border-left-color: #27AE60; opacity: 0.7; }
+    .order-card.done .order-filling, .order-card.done .order-name { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #ccc; }
     .order-card:active { transform: scale(0.99); }
+    .order-card.new-order { animation: slideIn 0.4s ease-out; border-left-color: #E74C3C; background: #FFF5F0; }
 
-    .order-row1 {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
-    }
-    .order-name {
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .order-time {
-      font-size: 12px;
-      color: var(--text-light);
-      white-space: nowrap;
-      margin-left: 8px;
-    }
-    .order-row2 {
-      font-size: 16px;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .order-filling {
-      font-weight: 600;
-    }
-    .order-weight {
-      color: var(--primary-dark);
-      font-weight: 700;
-    }
-    .order-type {
-      display: inline-block;
-      font-size: 13px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-    .order-type.cooked {
-      background: #FFF3E0;
-      color: #E67E22;
-    }
-    .order-type.raw {
-      background: #E3F2FD;
-      color: #1976D2;
-    }
-    .order-notes {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-top: 4px;
-      font-style: italic;
-    }
-    .order-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      justify-content: flex-end;
-    }
-    .btn-done {
-      padding: 10px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      background: var(--success);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .order-row1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .order-name { font-size: 18px; font-weight: 700; }
+    .order-time { font-size: 12px; color: var(--text-light); white-space: nowrap; margin-left: 8px; }
+    .order-row2 { font-size: 16px; margin-bottom: 4px; }
+    .order-filling { font-weight: 600; }
+    .order-weight { color: var(--primary-dark); font-weight: 700; }
+    .order-type { display: inline-block; font-size: 13px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
+    .order-type.cooked { background: #FFF3E0; color: #E67E22; }
+    .order-type.raw { background: #E3F2FD; color: #1976D2; }
+    .order-notes { font-size: 13px; color: var(--text-light); margin-top: 4px; font-style: italic; }
+    .order-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+    .btn-done { padding: 10px 20px; font-size: 15px; font-weight: 700; background: var(--success); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
     .btn-done:active { opacity: 0.8; }
-    .btn-delete {
-      padding: 10px 16px;
-      font-size: 15px;
-      font-weight: 600;
-      background: #fff;
-      color: var(--danger);
-      border: 2px solid var(--danger);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .btn-delete { padding: 10px 16px; font-size: 15px; font-weight: 600; background: #fff; color: var(--danger); border: 2px solid var(--danger); border-radius: 50px; cursor: pointer; }
     .btn-delete:active { background: #FFF5F5; }
-
-    .btn-undo {
-      padding: 10px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      background: #fff;
-      color: #E67E22;
-      border: 2px solid #E67E22;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .btn-undo { padding: 10px 20px; font-size: 15px; font-weight: 700; background: #fff; color: #E67E22; border: 2px solid #E67E22; border-radius: 50px; cursor: pointer; }
     .btn-undo:active { background: #FFF8F0; }
 
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-light);
-    }
-    .empty-state .emoji {
-      font-size: 64px;
-      margin-bottom: 16px;
-    }
-    .empty-state h3 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .empty-state p {
-      font-size: 15px;
-      line-height: 1.5;
-    }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
+    .empty-state .emoji { font-size: 64px; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
+    .empty-state p { font-size: 15px; line-height: 1.5; }
 
-    /* Toast */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      pointer-events: none;
-      width: calc(100% - 32px);
-      max-width: 450px;
-    }
-    .toast {
-      background: #2C3E50;
-      color: #fff;
-      padding: 14px 20px;
-      border-radius: 50px;
-      font-size: 15px;
-      font-weight: 600;
-      pointer-events: auto;
-      animation: toastIn 0.3s ease-out;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      white-space: nowrap;
-    }
+    /* ── Connection status ── */
+    .conn-status { position: fixed; top: 12px; right: 12px; font-size: 12px; padding: 4px 10px; border-radius: 50px; font-weight: 600; z-index: 100; }
+    .conn-status.online { background: #D5F5E3; color: #27AE60; }
+    .conn-status.offline { background: #FADBD8; color: #E74C3C; }
+
+    /* ── Toast ── */
+    .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: calc(100% - 32px); max-width: 450px; }
+    .toast { background: #2C3E50; color: #fff; padding: 14px 20px; border-radius: 50px; font-size: 15px; font-weight: 600; pointer-events: auto; animation: toastIn 0.3s ease-out; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     .toast.leaving { animation: toastOut 0.3s ease-in forwards; }
-    .toast-undo {
-      background: none;
-      border: none;
-      color: #F39C12;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-    .toast-undo:active { background: rgba(255,255,255,0.15); }
 
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes toastOut {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(20px); }
-    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* Confirm dialog */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.2s;
-    }
-    .dialog {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      margin: 24px;
-      text-align: center;
-      max-width: 320px;
-      width: 100%;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-    }
+    /* ── Overlay ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; display: flex; align-items: center; justify-content: center; }
+    .dialog { background: var(--card); border-radius: 16px; padding: 24px; margin: 24px; text-align: center; max-width: 320px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
     .dialog h3 { font-size: 18px; margin-bottom: 8px; }
     .dialog p { font-size: 14px; color: var(--text-light); margin-bottom: 20px; }
     .dialog-btns { display: flex; gap: 10px; }
-    .dialog-btns button {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      border: none;
-    }
-    .dialog-btns .btn-cancel { background: #f0f0f0; color: var(--text); }
-    .dialog-btns .btn-confirm { background: var(--danger); color: #fff; }
+    .dialog-btns button { flex: 1; padding: 12px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; }
+    .btn-cancel { background: #f0f0f0; color: var(--text); }
+    .btn-confirm { background: var(--danger); color: #fff; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    /* ── Link bar (bottom of customer page) ── */
+    .admin-link { text-align: center; margin-top: 40px; }
+    .admin-link a { color: var(--text-light); font-size: 13px; text-decoration: none; opacity: 0.5; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Header -->
-    <div class="header">
-      <h1>🥟 饺子订单本</h1>
-      <div class="subtitle">家庭饺子铺 · 接单助手</div>
-    </div>
 
-    <!-- Tabs -->
-    <nav class="tabs">
-      <button class="tab active" data-tab="add" onclick="switchTab('add')">
-        <span>📝</span> 记订单
-      </button>
-      <button class="tab" data-tab="list" onclick="switchTab('list')">
-        <span>📋</span> 看订单
-        <span class="badge" id="pendingBadge" style="display:none">0</span>
-      </button>
-    </nav>
+  <!-- ━━ CUSTOMER 顾客下单页面 ━━ -->
+  <div id="customerApp" class="app">
+    <div id="customerForm">
+      <div class="header">
+        <h1>🥟 王家饺子铺</h1>
+        <div class="sub">现包现煮 · 小区接单</div>
+      </div>
 
-    <!-- Add Order Panel -->
-    <section id="addPanel" class="panel active">
       <div class="form-group">
-        <label class="form-label">👤 顾客名字</label>
+        <label class="form-label">👤 您的称呼</label>
         <input class="input" type="text" id="customerName" placeholder="微信名或门牌号…" autocomplete="off">
       </div>
 
       <div class="form-group">
         <label class="form-label">🥩 饺子馅</label>
         <div class="pill-grid" id="fillingPills"></div>
-        <input class="input custom-filling-input" type="text" id="customFilling" placeholder="输入饺子馅…">
+        <input class="input custom-input" type="text" id="customFilling" placeholder="请输入饺子馅…">
       </div>
 
       <div class="form-group">
-        <label class="form-label">⚖️ 斤数</label>
+        <label class="form-label">⚖️ 要多少</label>
         <div class="weight-row">
           <button class="weight-btn" onclick="adjustWeight(-0.5)">−</button>
           <span class="weight-display" id="weightDisplay">1</span>
@@ -637,40 +203,61 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">🍳 煮还是生</label>
+        <label class="form-label">🍳 煮熟还是生的</label>
         <div class="toggle-row">
-          <button class="toggle-btn selected" id="btnCooked" onclick="setCookType('cooked')">🔥 煮熟</button>
-          <button class="toggle-btn" id="btnRaw" onclick="setCookType('raw')">❄️ 生的</button>
+          <button class="toggle-btn selected" id="btnCooked" onclick="setCookType('cooked')">🔥 煮好的</button>
+          <button class="toggle-btn" id="btnRaw" onclick="setCookType('raw')">❄️ 生的带走</button>
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label">📝 备注（选填）</label>
-        <input class="input" type="text" id="notes" placeholder="少放盐、多放姜、不要香菜…" autocomplete="off">
+        <input class="input" type="text" id="notes" placeholder="少盐、多姜、不要香菜…" autocomplete="off">
       </div>
 
-      <button class="btn-submit" onclick="submitOrder()">记下这笔订单 ✍️</button>
-    </section>
+      <button class="btn-submit" onclick="customerSubmit()">提交订单 🥟</button>
 
-    <!-- Order List Panel -->
-    <section id="listPanel" class="panel">
-      <!-- Stats -->
-      <div class="stats-bar">
-        <div class="stat-card">
-          <div class="stat-value" id="statTotal">0</div>
-          <div class="stat-label">今日订单</div>
-        </div>
-        <div class="stat-card pending">
-          <div class="stat-value" id="statPending">0</div>
-          <div class="stat-label">待完成</div>
-        </div>
-        <div class="stat-card done">
-          <div class="stat-value" id="statDone">0</div>
-          <div class="stat-label">已完成</div>
-        </div>
+      <div class="admin-link">
+        <a href="?admin">店主入口</a>
       </div>
+    </div>
 
-      <!-- Pending orders -->
+    <!-- Success screen -->
+    <div id="successScreen" class="success-screen" style="display:none">
+      <div class="emoji">✅</div>
+      <h2>下单成功！</h2>
+      <p>已经通知老板啦<br>饺子正在包，一会儿就好 🥟</p>
+      <button class="btn-new-order" onclick="resetCustomerForm()">再来一单</button>
+    </div>
+  </div>
+
+  <!-- ━━ ADMIN 店主接单面板 ━━ -->
+  <div id="adminApp" class="app" style="display:none">
+    <div class="conn-status offline" id="connStatus">⏳ 连接中…</div>
+
+    <div class="header">
+      <h1>🥟 饺子订单本</h1>
+      <div class="sub">实时接单面板</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="pending" onclick="adminSwitchTab('pending')">
+        待做 <span class="badge" id="adminBadge" style="display:none">0</span>
+      </button>
+      <button class="tab" data-tab="done" onclick="adminSwitchTab('done')">
+        已完成
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card total"><div class="stat-value" id="statTotal">0</div><div class="stat-label">今日订单</div></div>
+      <div class="stat-card pending"><div class="stat-value" id="statPending">0</div><div class="stat-label">待完成</div></div>
+      <div class="stat-card done"><div class="stat-value" id="statDone">0</div><div class="stat-label">已完成</div></div>
+    </div>
+
+    <!-- Pending orders -->
+    <div id="pendingSection">
       <div class="section-header">
         <div class="section-title">🟠 待完成 <span class="section-count" id="pendingCount"></span></div>
         <button class="btn-text" onclick="completeAll()" id="btnCompleteAll" style="display:none">全部完成</button>
@@ -679,10 +266,12 @@
       <div class="empty-state" id="pendingEmpty">
         <div class="emoji">🎉</div>
         <h3>没有待完成的订单</h3>
-        <p>去「记订单」里添加新订单吧</p>
+        <p>顾客下单后会实时出现在这里</p>
       </div>
+    </div>
 
-      <!-- Completed orders -->
+    <!-- Done orders -->
+    <div id="doneSection" style="display:none">
       <div class="section-header" style="margin-top:24px">
         <div class="section-title">🟢 已完成 <span class="section-count" id="doneCount"></span></div>
         <button class="btn-text danger" onclick="clearCompleted()" id="btnClearCompleted" style="display:none">清空已完成</button>
@@ -693,434 +282,433 @@
         <h3>还没有完成的订单</h3>
         <p>点击订单上的「✓ 做好了」来标记完成</p>
       </div>
-    </section>
+    </div>
   </div>
 
-  <!-- Toast container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script>
-    // ── State ────────────────────────────────────────
-    const STORAGE_KEY = 'dumpling_orders';
-    const FILLINGS = [
-      '猪肉白菜', '猪肉韭菜', '猪肉芹菜', '韭菜鸡蛋',
-      '猪肉大葱', '牛肉大葱', '猪肉茴香', '三鲜馅',
-      '素三鲜', '猪肉酸菜', '羊肉大葱', '其他'
-    ];
+<script>
+// ━━━━━━━━━━━━━━━━━━ Supabase 初始化 ━━━━━━━━━━━━━━━━━━
+const SUPABASE_URL = 'https://kpyrqhrpyfyelvjowpdd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-pkkDqnWl4mQw-1qJGQirg_JHLbC9O4';
 
-    let state = {
-      orders: [],
-      selectedFilling: null,
-      weight: 1,
-      cookType: 'cooked', // 'cooked' | 'raw'
-    };
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error('Supabase init error:', e);
+}
 
-    // ── Load & Save ─────────────────────────────────
-    function loadOrders() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        state.orders = raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        state.orders = [];
-      }
-    }
+const FILLINGS = [
+  '猪肉白菜', '猪肉韭菜', '猪肉芹菜', '韭菜鸡蛋',
+  '猪肉大葱', '牛肉大葱', '猪肉茴香', '三鲜馅',
+  '素三鲜', '猪肉酸菜', '羊肉大葱', '其他'
+];
 
-    function saveOrders() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
-      } catch (e) {
-        showToast('⚠️ 存储空间不足，请清理旧订单');
-      }
-    }
+const IS_ADMIN = window.location.search.includes('admin');
 
-    // ── Order helpers ────────────────────────────────
-    function isToday(isoStr) {
-      const d = new Date(isoStr);
-      const now = new Date();
-      return d.getFullYear() === now.getFullYear() &&
-             d.getMonth() === now.getMonth() &&
-             d.getDate() === now.getDate();
-    }
+// ━━━━━━━━━━━━━━━━━━ 通用工具 ━━━━━━━━━━━━━━━━━━
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+function formatWeight(w) { return w % 1 === 0 ? w : w.toFixed(1); }
 
-    function timeAgo(isoStr) {
-      const now = Date.now();
-      const then = new Date(isoStr).getTime();
-      const diffMin = Math.floor((now - then) / 60000);
+function timeAgo(isoStr) {
+  const now = Date.now();
+  const then = new Date(isoStr).getTime();
+  const diffMin = Math.floor((now - then) / 60000);
+  if (diffMin < 1) return '刚刚';
+  if (diffMin < 60) return `${diffMin}分钟前`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour}小时前`;
+  const d = new Date(isoStr);
+  return `${d.getMonth()+1}-${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
 
-      if (diffMin < 1) return '刚刚';
-      if (diffMin < 60) return `${diffMin}分钟前`;
-      const diffHour = Math.floor(diffMin / 60);
-      if (diffHour < 24) return `${diffHour}小时前`;
+function todayStart() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d.toISOString();
+}
 
-      const d = new Date(isoStr);
-      const yesterday = new Date(now);
-      yesterday.setDate(yesterday.getDate() - 1);
-      if (d.getFullYear() === yesterday.getFullYear() &&
-          d.getMonth() === yesterday.getMonth() &&
-          d.getDate() === yesterday.getDate()) {
-        return `昨天 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      }
-      return `${d.getMonth()+1}-${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    }
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('leaving'); t.addEventListener('animationend', () => t.remove()); }, 3000);
+}
 
-    // ── Render ───────────────────────────────────────
-    function renderFillingPills() {
-      const container = document.getElementById('fillingPills');
-      container.innerHTML = FILLINGS.map(f =>
-        `<button class="pill${state.selectedFilling === f ? ' selected' : ''}" onclick="selectFilling('${f}')">${f}</button>`
-      ).join('');
+// ━━━━━━━━━━━━━━━━━━ 顾客端 ━━━━━━━━━━━━━━━━━━
+let customerState = { selectedFilling: null, weight: 1, cookType: 'cooked' };
 
-      const customInput = document.getElementById('customFilling');
-      if (state.selectedFilling === '其他') {
-        customInput.classList.add('show');
-        customInput.focus();
-      } else {
-        customInput.classList.remove('show');
-        customInput.value = '';
-      }
-    }
+function renderFillingPills() {
+  const c = document.getElementById('fillingPills');
+  c.innerHTML = FILLINGS.map(f =>
+    `<button class="pill${customerState.selectedFilling === f ? ' selected' : ''}" onclick="selectFilling('${f}')">${f}</button>`
+  ).join('');
+  const ci = document.getElementById('customFilling');
+  if (customerState.selectedFilling === '其他') {
+    ci.classList.add('show');
+    setTimeout(() => ci.focus(), 100);
+  } else {
+    ci.classList.remove('show');
+    ci.value = '';
+  }
+}
 
-    function updateWeightDisplay() {
-      document.getElementById('weightDisplay').textContent =
-        state.weight % 1 === 0 ? state.weight : state.weight.toFixed(1);
-    }
+function selectFilling(f) { customerState.selectedFilling = f; renderFillingPills(); }
 
-    function renderCookType() {
-      const btnCooked = document.getElementById('btnCooked');
-      const btnRaw = document.getElementById('btnRaw');
-      btnCooked.classList.toggle('selected', state.cookType === 'cooked');
-      btnRaw.classList.toggle('selected', state.cookType === 'raw');
-    }
+function adjustWeight(d) {
+  customerState.weight = Math.max(0.5, Math.round((customerState.weight + d) * 10) / 10);
+  document.getElementById('weightDisplay').textContent = formatWeight(customerState.weight);
+}
 
-    function renderOrderCard(order) {
-      const isPending = order.status === 'pending';
-      const statusClass = isPending ? 'pending' : 'done';
-      const typeClass = order.type === 'cooked' ? 'cooked' : 'raw';
-      const typeLabel = order.type === 'cooked' ? '🔥 煮熟' : '❄️ 生的';
+function setWeight(w) {
+  customerState.weight = w;
+  document.getElementById('weightDisplay').textContent = formatWeight(w);
+}
 
-      let actionsHtml = '';
-      if (isPending) {
-        actionsHtml = `
-          <button class="btn-done" onclick="event.stopPropagation(); markDone('${order.id}')">✓ 做好了</button>
-          <button class="btn-delete" onclick="event.stopPropagation(); confirmDelete('${order.id}')">🗑</button>
-        `;
-      } else {
-        actionsHtml = `
-          <button class="btn-undo" onclick="event.stopPropagation(); markUndone('${order.id}')">↩ 还没好</button>
-          <button class="btn-delete" onclick="event.stopPropagation(); confirmDelete('${order.id}')">🗑</button>
-        `;
-      }
+function setCookType(t) {
+  customerState.cookType = t;
+  document.getElementById('btnCooked').classList.toggle('selected', t === 'cooked');
+  document.getElementById('btnRaw').classList.toggle('selected', t === 'raw');
+}
 
-      return `
-        <div class="order-card ${statusClass}" onclick="event.stopPropagation(); toggleOrder('${order.id}')">
-          <div class="order-row1">
-            <span class="order-name">${escapeHtml(order.customerName)}</span>
-            <span class="order-time">${timeAgo(order.createdAt)}</span>
-          </div>
-          <div class="order-row2">
-            <span class="order-filling">${escapeHtml(order.filling)}</span>
-            &nbsp;
-            <span class="order-weight">${formatWeight(order.weight)}斤</span>
-            &nbsp;
-            <span class="order-type ${typeClass}">${typeLabel}</span>
-          </div>
-          ${order.notes ? `<div class="order-notes">${escapeHtml(order.notes)}</div>` : ''}
-          ${order.doneAt && !isPending ? `<div style="font-size:12px;color:var(--text-light);margin-top:4px;">✅ ${timeAgo(order.doneAt)}完成</div>` : ''}
-          <div class="order-actions">${actionsHtml}</div>
-        </div>
-      `;
-    }
+function getFillingValue() {
+  if (customerState.selectedFilling === '其他') {
+    const v = document.getElementById('customFilling').value.trim();
+    return v || '未指定';
+  }
+  return customerState.selectedFilling || '未指定';
+}
 
-    function renderOrderList() {
-      const todayOrders = state.orders.filter(o => isToday(o.createdAt));
-      const pendingOrders = todayOrders.filter(o => o.status === 'pending');
-      const doneOrders = todayOrders.filter(o => o.status === 'done');
+async function customerSubmit() {
+  const name = document.getElementById('customerName').value.trim();
+  const filling = getFillingValue();
+  const weight = customerState.weight;
+  const type = customerState.cookType;
+  const notes = document.getElementById('notes').value.trim();
 
-      // Pending list (newest first)
-      const pendingList = document.getElementById('pendingList');
-      if (pendingOrders.length > 0) {
-        pendingList.innerHTML = pendingOrders.map(renderOrderCard).join('');
-        document.getElementById('pendingEmpty').style.display = 'none';
-        document.getElementById('btnCompleteAll').style.display = '';
-      } else {
-        pendingList.innerHTML = '';
-        document.getElementById('pendingEmpty').style.display = '';
-        document.getElementById('btnCompleteAll').style.display = 'none';
-      }
+  if (!name) { showToast('⚠️ 请填写您的称呼'); document.getElementById('customerName').focus(); return; }
+  if (!customerState.selectedFilling) { showToast('⚠️ 请选择饺子馅'); return; }
+  if (customerState.selectedFilling === '其他' && !document.getElementById('customFilling').value.trim()) {
+    showToast('⚠️ 请输入饺子馅'); document.getElementById('customFilling').focus(); return;
+  }
 
-      // Done list (newest done first)
-      const doneList = document.getElementById('doneList');
-      if (doneOrders.length > 0) {
-        doneList.innerHTML = doneOrders.map(renderOrderCard).join('');
-        document.getElementById('doneEmpty').style.display = 'none';
-        document.getElementById('btnClearCompleted').style.display = '';
-      } else {
-        doneList.innerHTML = '';
-        document.getElementById('doneEmpty').style.display = '';
-        document.getElementById('btnClearCompleted').style.display = 'none';
-      }
+  const btn = document.querySelector('#customerApp .btn-submit');
+  btn.disabled = true;
+  btn.textContent = '提交中…';
 
-      // Counts
-      document.getElementById('pendingCount').textContent = pendingOrders.length > 0 ? `(${pendingOrders.length})` : '';
-      document.getElementById('doneCount').textContent = doneOrders.length > 0 ? `(${doneOrders.length})` : '';
+  const { error } = await supabase.from('orders').insert({
+    customer_name: name,
+    filling: filling,
+    weight: weight,
+    type: type,
+    notes: notes,
+    status: 'pending'
+  });
 
-      // Stats
-      document.getElementById('statTotal').textContent = todayOrders.length;
-      document.getElementById('statPending').textContent = pendingOrders.length;
-      document.getElementById('statDone').textContent = doneOrders.length;
+  if (error) {
+    console.error('Submit error:', error);
+    showToast('⚠️ 提交失败，请检查网络后重试');
+    btn.disabled = false;
+    btn.textContent = '提交订单 🥟';
+    return;
+  }
 
-      // Badge
-      const badge = document.getElementById('pendingBadge');
-      if (pendingOrders.length > 0) {
-        badge.style.display = 'flex';
-        badge.textContent = pendingOrders.length;
-      } else {
-        badge.style.display = 'none';
-      }
-    }
+  document.getElementById('customerForm').style.display = 'none';
+  document.getElementById('successScreen').style.display = '';
+  btn.disabled = false;
+  btn.textContent = '提交订单 🥟';
+}
 
-    // ── Actions ──────────────────────────────────────
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById('addPanel').classList.toggle('active', tab === 'add');
-      document.getElementById('listPanel').classList.toggle('active', tab === 'list');
-      if (tab === 'list') renderOrderList();
-    }
+function resetCustomerForm() {
+  document.getElementById('customerName').value = '';
+  customerState.selectedFilling = null;
+  customerState.weight = 1;
+  customerState.cookType = 'cooked';
+  document.getElementById('notes').value = '';
+  renderFillingPills();
+  document.getElementById('weightDisplay').textContent = '1';
+  document.getElementById('btnCooked').classList.add('selected');
+  document.getElementById('btnRaw').classList.remove('selected');
+  document.getElementById('customerForm').style.display = '';
+  document.getElementById('successScreen').style.display = 'none';
+}
 
-    function selectFilling(filling) {
-      state.selectedFilling = filling;
-      renderFillingPills();
-    }
+// ━━━━━━━━━━━━━━━━━━ 店主端 ━━━━━━━━━━━━━━━━━━
+let allOrders = [];
+let currentAdminTab = 'pending';
+let realtimeChannel = null;
 
-    function adjustWeight(delta) {
-      const newWeight = Math.max(0.5, state.weight + delta);
-      state.weight = Math.round(newWeight * 10) / 10;
-      updateWeightDisplay();
-    }
+async function loadOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .gte('created_at', todayStart())
+    .order('created_at', { ascending: false });
 
-    function setWeight(w) {
-      state.weight = w;
-      updateWeightDisplay();
-    }
+  if (error) { console.error('Load error:', error); return; }
+  allOrders = data || [];
+  renderAdmin();
+}
 
-    function setCookType(type) {
-      state.cookType = type;
-      renderCookType();
-    }
+function setupRealtime() {
+  realtimeChannel = supabase
+    .channel('orders-realtime')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'orders' },
+      (payload) => {
+        // Only handle today's orders
+        const order = payload.new;
+        const eventType = payload.eventType;
 
-    function getFillingValue() {
-      if (state.selectedFilling === '其他') {
-        const custom = document.getElementById('customFilling').value.trim();
-        return custom || '未指定';
-      }
-      return state.selectedFilling || '未指定';
-    }
-
-    function submitOrder() {
-      const customerName = document.getElementById('customerName').value.trim();
-      const filling = getFillingValue();
-      const weight = state.weight;
-      const cookType = state.cookType;
-      const notes = document.getElementById('notes').value.trim();
-
-      if (!customerName) {
-        showToast('⚠️ 请填写顾客名字');
-        document.getElementById('customerName').focus();
-        return;
-      }
-      if (!state.selectedFilling) {
-        showToast('⚠️ 请选择饺子馅');
-        return;
-      }
-      if (state.selectedFilling === '其他') {
-        const custom = document.getElementById('customFilling').value.trim();
-        if (!custom) {
-          showToast('⚠️ 请输入饺子馅');
-          document.getElementById('customFilling').focus();
-          return;
+        if (eventType === 'INSERT') {
+          // Check if it's already in the list (local insert)
+          if (!allOrders.find(o => o.id === order.id)) {
+            allOrders.unshift(order);
+            renderAdmin();
+            // Brief highlight animation
+            setTimeout(() => {
+              const cards = document.querySelectorAll('.order-card');
+              cards.forEach(c => {
+                if (c.dataset.id === order.id) c.classList.add('new-order');
+              });
+            }, 100);
+            setTimeout(() => {
+              document.querySelectorAll('.order-card.new-order').forEach(c => c.classList.remove('new-order'));
+            }, 2000);
+          }
+        } else if (eventType === 'UPDATE') {
+          const idx = allOrders.findIndex(o => o.id === order.id);
+          if (idx !== -1) {
+            allOrders[idx] = order;
+          } else {
+            allOrders.unshift(order);
+          }
+          renderAdmin();
+        } else if (eventType === 'DELETE') {
+          allOrders = allOrders.filter(o => o.id !== payload.old.id);
+          renderAdmin();
         }
-      }
+      })
+    .subscribe();
+}
 
-      const order = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        customerName,
-        filling,
-        weight,
-        type: cookType,
-        notes,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        doneAt: null,
-      };
+function updateConnStatus(online) {
+  const s = document.getElementById('connStatus');
+  if (online) {
+    s.textContent = '🟢 在线';
+    s.className = 'conn-status online';
+  } else {
+    s.textContent = '🔴 离线';
+    s.className = 'conn-status offline';
+  }
+}
 
-      state.orders.unshift(order);
-      saveOrders();
+function renderAdmin() {
+  const pendingOrders = allOrders.filter(o => o.status === 'pending');
+  const doneOrders = allOrders.filter(o => o.status === 'done');
 
-      // Reset form
-      document.getElementById('customerName').value = '';
-      state.selectedFilling = null;
-      state.weight = 1;
-      state.cookType = 'cooked';
-      document.getElementById('notes').value = '';
-      renderFillingPills();
-      updateWeightDisplay();
-      renderCookType();
+  // Stats
+  document.getElementById('statTotal').textContent = allOrders.length;
+  document.getElementById('statPending').textContent = pendingOrders.length;
+  document.getElementById('statDone').textContent = doneOrders.length;
 
-      showToast('✅ 订单已记录');
-      updateBadgeOnly();
-    }
+  // Badge
+  const badge = document.getElementById('adminBadge');
+  if (pendingOrders.length > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = pendingOrders.length;
+  } else {
+    badge.style.display = 'none';
+  }
 
-    function markDone(id) {
-      const order = state.orders.find(o => o.id === id);
-      if (!order || order.status === 'done') return;
-      order.status = 'done';
-      order.doneAt = new Date().toISOString();
-      saveOrders();
-      renderOrderList();
-      showToast(`✅ 做好了！<button class="toast-undo" onclick="markUndone('${id}')">↩ 撤销</button>`);
-    }
+  // Pending list
+  const pendingList = document.getElementById('pendingList');
+  const pendingEmpty = document.getElementById('pendingEmpty');
+  const btnCompleteAll = document.getElementById('btnCompleteAll');
+  if (pendingOrders.length > 0) {
+    pendingList.innerHTML = pendingOrders.map(o => renderOrderCard(o)).join('');
+    pendingEmpty.style.display = 'none';
+    btnCompleteAll.style.display = '';
+  } else {
+    pendingList.innerHTML = '';
+    pendingEmpty.style.display = '';
+    btnCompleteAll.style.display = 'none';
+  }
+  document.getElementById('pendingCount').textContent = pendingOrders.length > 0 ? `(${pendingOrders.length})` : '';
 
-    function markUndone(id) {
-      const order = state.orders.find(o => o.id === id);
-      if (!order || order.status === 'pending') return;
-      order.status = 'pending';
-      order.doneAt = null;
-      saveOrders();
-      renderOrderList();
-      updateBadgeOnly();
-      showToast('↩ 已恢复为待完成');
-    }
+  // Done list
+  const doneList = document.getElementById('doneList');
+  const doneEmpty = document.getElementById('doneEmpty');
+  const btnClearCompleted = document.getElementById('btnClearCompleted');
+  if (doneOrders.length > 0) {
+    doneList.innerHTML = doneOrders.map(o => renderOrderCard(o)).join('');
+    doneEmpty.style.display = 'none';
+    btnClearCompleted.style.display = '';
+  } else {
+    doneList.innerHTML = '';
+    doneEmpty.style.display = '';
+    btnClearCompleted.style.display = 'none';
+  }
+  document.getElementById('doneCount').textContent = doneOrders.length > 0 ? `(${doneOrders.length})` : '';
+}
 
-    function toggleOrder(id) {
-      const order = state.orders.find(o => o.id === id);
-      if (!order) return;
-      if (order.status === 'pending') {
-        markDone(id);
-      } else {
-        markUndone(id);
-      }
-    }
+function renderOrderCard(order) {
+  const isPending = order.status === 'pending';
+  const statusClass = isPending ? 'pending' : 'done';
+  const typeClass = order.type === 'cooked' ? 'cooked' : 'raw';
+  const typeLabel = order.type === 'cooked' ? '🔥 煮熟' : '❄️ 生的';
 
-    function confirmDelete(id) {
-      const order = state.orders.find(o => o.id === id);
-      if (!order) return;
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.innerHTML = `
-        <div class="dialog">
-          <h3>确认删除？</h3>
-          <p>${escapeHtml(order.customerName)} · ${escapeHtml(order.filling)} · ${formatWeight(order.weight)}斤</p>
-          <div class="dialog-btns">
-            <button class="btn-cancel" id="btnCancel">取消</button>
-            <button class="btn-confirm" id="btnConfirm">删除</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
+  let actionsHtml = '';
+  if (isPending) {
+    actionsHtml = `
+      <button class="btn-done" onclick="event.stopPropagation(); adminMarkDone('${order.id}')">✓ 做好了</button>
+      <button class="btn-delete" onclick="event.stopPropagation(); adminConfirmDelete('${order.id}')">🗑</button>`;
+  } else {
+    actionsHtml = `
+      <button class="btn-undo" onclick="event.stopPropagation(); adminMarkUndone('${order.id}')">↩ 还没好</button>
+      <button class="btn-delete" onclick="event.stopPropagation(); adminConfirmDelete('${order.id}')">🗑</button>`;
+  }
 
-      overlay.querySelector('#btnCancel').onclick = () => overlay.remove();
-      overlay.querySelector('#btnConfirm').onclick = () => {
-        overlay.remove();
-        deleteOrder(id);
-      };
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    }
+  return `
+    <div class="order-card ${statusClass}" data-id="${order.id}" onclick="event.stopPropagation(); adminToggle('${order.id}')">
+      <div class="order-row1">
+        <span class="order-name">${escapeHtml(order.customer_name)}</span>
+        <span class="order-time">${timeAgo(order.created_at)}</span>
+      </div>
+      <div class="order-row2">
+        <span class="order-filling">${escapeHtml(order.filling)}</span>
+        &nbsp;<span class="order-weight">${formatWeight(order.weight)}斤</span>
+        <span class="order-type ${typeClass}">${typeLabel}</span>
+      </div>
+      ${order.notes ? `<div class="order-notes">${escapeHtml(order.notes)}</div>` : ''}
+      ${order.done_at && !isPending ? `<div style="font-size:12px;color:var(--text-light);margin-top:4px;">✅ ${timeAgo(order.done_at)}完成</div>` : ''}
+      <div class="order-actions">${actionsHtml}</div>
+    </div>`;
+}
 
-    function deleteOrder(id) {
-      state.orders = state.orders.filter(o => o.id !== id);
-      saveOrders();
-      renderOrderList();
-      updateBadgeOnly();
-      showToast('🗑 已删除');
-    }
+function adminSwitchTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('#adminApp .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`#adminApp .tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('pendingSection').style.display = tab === 'pending' ? '' : 'none';
+  document.getElementById('doneSection').style.display = tab === 'done' ? '' : 'none';
+}
 
-    function completeAll() {
-      const todayPending = state.orders.filter(o => isToday(o.createdAt) && o.status === 'pending');
-      if (todayPending.length === 0) return;
-      const now = new Date().toISOString();
-      todayPending.forEach(o => { o.status = 'done'; o.doneAt = now; });
-      saveOrders();
-      renderOrderList();
-      showToast(`✅ 全部 ${todayPending.length} 笔订单已完成`);
-    }
+async function adminMarkDone(id) {
+  const { error } = await supabase.from('orders').update({
+    status: 'done',
+    done_at: new Date().toISOString()
+  }).eq('id', id);
+  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
+  showToast('✅ 做好了！');
+}
 
-    function clearCompleted() {
-      const todayDone = state.orders.filter(o => isToday(o.createdAt) && o.status === 'done');
-      if (todayDone.length === 0) return;
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.innerHTML = `
-        <div class="dialog">
-          <h3>清空所有已完成订单？</h3>
-          <p>共 ${todayDone.length} 笔，此操作不可恢复</p>
-          <div class="dialog-btns">
-            <button class="btn-cancel" id="btnCancel">取消</button>
-            <button class="btn-confirm" id="btnConfirm">清空</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-      overlay.querySelector('#btnCancel').onclick = () => overlay.remove();
-      overlay.querySelector('#btnConfirm').onclick = () => {
-        overlay.remove();
-        const ids = new Set(todayDone.map(o => o.id));
-        state.orders = state.orders.filter(o => !ids.has(o.id));
-        saveOrders();
-        renderOrderList();
-        showToast('🗑 已清空');
-      };
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    }
+async function adminMarkUndone(id) {
+  const { error } = await supabase.from('orders').update({
+    status: 'pending',
+    done_at: null
+  }).eq('id', id);
+  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
+  showToast('↩ 已恢复为待完成');
+}
 
-    function updateBadgeOnly() {
-      const pendingCount = state.orders.filter(o => isToday(o.createdAt) && o.status === 'pending').length;
-      const badge = document.getElementById('pendingBadge');
-      if (pendingCount > 0) {
-        badge.style.display = 'flex';
-        badge.textContent = pendingCount;
-      } else {
-        badge.style.display = 'none';
-      }
-    }
+function adminToggle(id) {
+  const order = allOrders.find(o => o.id === id);
+  if (!order) return;
+  if (order.status === 'pending') adminMarkDone(id);
+  else adminMarkUndone(id);
+}
 
-    // ── Toast ─────────────────────────────────────────
-    function showToast(html) {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = html;
-      container.appendChild(toast);
+function adminConfirmDelete(id) {
+  const order = allOrders.find(o => o.id === id);
+  if (!order) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="dialog">
+      <h3>确认删除？</h3>
+      <p>${escapeHtml(order.customer_name)} · ${escapeHtml(order.filling)} · ${formatWeight(order.weight)}斤</p>
+      <div class="dialog-btns">
+        <button class="btn-cancel">取消</button>
+        <button class="btn-confirm">删除</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
+  overlay.querySelector('.btn-confirm').onclick = async () => {
+    overlay.remove();
+    const { error } = await supabase.from('orders').delete().eq('id', id);
+    if (error) { console.error(error); showToast('⚠️ 删除失败'); return; }
+    showToast('🗑 已删除');
+  };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
 
-      // Auto dismiss after 4 seconds
-      setTimeout(() => {
-        toast.classList.add('leaving');
-        toast.addEventListener('animationend', () => toast.remove());
-      }, 4000);
-    }
+async function completeAll() {
+  const pendingIds = allOrders.filter(o => o.status === 'pending').map(o => o.id);
+  if (pendingIds.length === 0) return;
+  const now = new Date().toISOString();
+  const { error } = await supabase.from('orders').update({
+    status: 'done',
+    done_at: now
+  }).in('id', pendingIds);
+  if (error) { console.error(error); showToast('⚠️ 操作失败'); return; }
+  showToast(`✅ 全部 ${pendingIds.length} 笔订单已完成`);
+}
 
-    // ── Utils ────────────────────────────────────────
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
+function clearCompleted() {
+  const doneIds = allOrders.filter(o => o.status === 'done').map(o => o.id);
+  if (doneIds.length === 0) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="dialog">
+      <h3>清空所有已完成订单？</h3>
+      <p>共 ${doneIds.length} 笔，不可恢复</p>
+      <div class="dialog-btns">
+        <button class="btn-cancel">取消</button>
+        <button class="btn-confirm">清空</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
+  overlay.querySelector('.btn-confirm').onclick = async () => {
+    overlay.remove();
+    const { error } = await supabase.from('orders').delete().in('id', doneIds);
+    if (error) { console.error(error); showToast('⚠️ 清空失败'); return; }
+    showToast('🗑 已清空');
+  };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
 
-    function formatWeight(w) {
-      return w % 1 === 0 ? w : w.toFixed(1);
-    }
+// ━━━━━━━━━━━━━━━━━━ 启动 ━━━━━━━━━━━━━━━━━━
+function init() {
+  if (IS_ADMIN) {
+    document.getElementById('adminApp').style.display = '';
+    document.getElementById('customerApp').style.display = 'none';
+    loadOrders().then(() => {
+      setupRealtime();
+      updateConnStatus(true);
+      // Detect offline
+      window.addEventListener('online', () => updateConnStatus(true));
+      window.addEventListener('offline', () => updateConnStatus(false));
+    });
+  } else {
+    document.getElementById('customerApp').style.display = '';
+    document.getElementById('adminApp').style.display = 'none';
+    renderFillingPills();
+    document.getElementById('weightDisplay').textContent = '1';
+  }
+}
 
-    // ── Init ─────────────────────────────────────────
-    function init() {
-      loadOrders();
-      renderFillingPills();
-      updateWeightDisplay();
-      renderCookType();
-      renderOrderList();
-      updateBadgeOnly();
-    }
-
-    init();
-  </script>
+init();
+</script>
 </body>
 </html>
